@@ -58,6 +58,12 @@ Si no se puede responder eso, la elección no está justificada.
 - Preferir flujos que puedan validarse en la nube (CI/CD) cuando el entorno local no está disponible.
 - No dar por sentado que el usuario puede ejecutar una app en un emulador o dispositivo en este momento.
 
+## 9. No ejecutar comandos largos o de impacto sin aprobación previa
+
+- Antes de correr un comando que pueda tardar más de unos pocos segundos, descargar imágenes, modificar el sistema o generar archivos no previstos, el agente debe explicar qué va a hacer y esperar la aprobación del usuario.
+- El usuario debe poder decidir si ejecuta el comando él mismo o si lo autoriza al agente.
+- Esto incluye: instalaciones, builds largos, descargas de imágenes Docker, generación de wrappers, migraciones, etc.
+
 ## 8. Ejemplo de lo que se espera
 
 En vez de decir:
