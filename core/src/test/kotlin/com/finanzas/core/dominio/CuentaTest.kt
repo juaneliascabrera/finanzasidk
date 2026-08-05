@@ -111,6 +111,27 @@ class CuentaTest {
         assertEquals(Dinero.ars("150000.00"), cuenta.saldoInicial)
     }
 
+    @Test
+    fun rechaza_egreso_directo_en_cuenta_de_inversion() {
+        val cuenta = Cuenta(
+            id = "fci",
+            nombre = "FCI Conservador",
+            moneda = Moneda.ARS,
+            tipo = TipoCuenta.INVERSION,
+            saldoInicial = Dinero.ars("150000.00")
+        )
+        val egreso = Egreso(
+            cuentaId = "fci",
+            fecha = LocalDate.of(2026, 8, 5),
+            monto = Dinero.ars("50000.00"),
+            categoria = null
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            cuenta.saldo(listOf(egreso))
+        }
+    }
+
     private fun cuentaBrubank(): Cuenta {
         return Cuenta(
             id = "brubank",

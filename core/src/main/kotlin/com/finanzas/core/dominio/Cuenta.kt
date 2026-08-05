@@ -28,7 +28,12 @@ data class Cuenta(
             .fold(saldoInicial) { saldo, movimiento ->
                 when (movimiento) {
                     is Ingreso -> saldo + movimiento.monto
-                    is Egreso -> saldo - movimiento.monto
+                    is Egreso -> {
+                        require(tipo == TipoCuenta.OPERATIVA) {
+                            "Una cuenta de inversion no puede registrar egresos directos"
+                        }
+                        saldo - movimiento.monto
+                    }
                 }
             }
     }
