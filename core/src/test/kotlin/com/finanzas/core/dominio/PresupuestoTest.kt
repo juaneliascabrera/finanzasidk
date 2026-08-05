@@ -18,7 +18,8 @@ class PresupuestoTest {
         val egreso = Egreso(
             fecha = LocalDate.of(2026, 8, 5),
             monto = Dinero.ars("50000.00"),
-            categoria = categoria
+            categoria = categoria,
+            cuentaId = "brubank"
         )
 
         val restante = presupuesto.restante(listOf(egreso))
@@ -87,7 +88,8 @@ class PresupuestoTest {
         val egreso = Egreso(
             fecha = LocalDate.of(2026, 8, 5),
             monto = Dinero.usd("50.00"),
-            categoria = Categoria(id = "comida", nombre = "Comida")
+            categoria = Categoria(id = "comida", nombre = "Comida"),
+            cuentaId = "brubank"
         )
 
         assertEquals(Dinero.ars("300000.00"), presupuesto.restante(listOf(egreso)))
@@ -178,7 +180,8 @@ class PresupuestoTest {
         return Egreso(
             fecha = fecha,
             monto = Dinero.ars(monto),
-            categoria = categoria
+            categoria = categoria,
+            cuentaId = "brubank"
         )
     }
 }
