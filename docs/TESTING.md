@@ -32,7 +32,7 @@ docker run --rm \
   ./gradlew test --no-daemon --console=plain --rerun-tasks
 ```
 
-El volumen `finanzas-gradle-home` conserva la distribución de Gradle y las dependencias descargadas entre ejecuciones. `--no-daemon` evita iniciar un proceso persistente dentro del contenedor. `test` ejecuta los tests de todos los módulos que tengan esa tarea. `--rerun-tasks` fuerza la ejecución aunque Gradle los considere `UP-TO-DATE`.
+El volumen `finanzas-gradle-home` conserva la distribución de Gradle y las dependencias descargadas entre ejecuciones. `--no-daemon` evita iniciar un proceso persistente dentro del contenedor. `test` ejecuta los tests de todos los módulos que tengan esa tarea. La tarea `test` está configurada para ejecutarse siempre, mientras que las tareas de compilación siguen usando la caché incremental.
 
 Para ejecutar la validación completa del módulo:
 
