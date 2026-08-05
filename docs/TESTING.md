@@ -6,6 +6,24 @@ Este documento describe las formas de testear el proyecto para tener seguridad d
 
 Testear no es un objetivo en sí mismo: es una herramienta para detectar errores tempranos en la lógica que más importa. Dado que el MVP es simple, la estrategia de testing también debe ser simple.
 
+## Estado actual
+
+El proyecto tiene un módulo `core` de Kotlin/JVM preparado para tests unitarios. Este módulo no depende de Android, Compose, Room ni de un dispositivo.
+
+Para ejecutar sus tests:
+
+```bash
+./gradlew :core:test
+```
+
+Para ejecutar la validación completa del módulo:
+
+```bash
+./gradlew :core:check
+```
+
+El primer test todavía no fue creado. La siguiente etapa es definir una regla de dominio y expresarla como test antes de implementar código productivo.
+
 ## 1. Tests unitarios (obligatorios desde el inicio)
 
 **Qué testean:** lógica pura que no depende de Android ni de la base de datos.
@@ -16,9 +34,11 @@ Ejemplos:
 - Calcular el saldo de una cuenta después de ingresos y egresos.
 - Validar que una categoría no tenga nombre vacío.
 
-**Herramientas:**
-- **JUnit 5** o **JUnit 4** (según lo que soporte el proyecto).
-- **Kotest** como alternativa más expresiva para Kotlin.
+**Herramientas actuales:**
+- **JUnit 5**: framework que ejecuta los tests y reporta si pasan o fallan.
+- **Kotlin Test** con adaptador JUnit 5: permite usar aserciones idiomáticas de Kotlin sobre JUnit 5.
+
+No agregamos Kotest por ahora: ofrece una sintaxis alternativa, pero no resuelve una necesidad actual y agregaría otra decisión y dependencia.
 
 **Por qué no necesitamos inyección de dependencias:**
 Para testear lógica pura no hace falta. Se crean instancias directamente con los datos de prueba. La inyección de dependencias se vuelve útil cuando una clase necesita colaboradores complejos que son difíciles de construir en un test. En este MVP, podemos evitar esa complejidad inicial usando **fakes manuales** o pasando dependencias simples por constructor.
