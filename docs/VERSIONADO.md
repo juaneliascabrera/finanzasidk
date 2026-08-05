@@ -44,7 +44,14 @@ El desarrollador no avanza hasta que el propietario del proyecto apruebe el issu
 
 - Si un commit introduce un cambio de arquitectura importante, el mensaje debe explicar por qué.
 
-### 4. Versionado semántico
+### 4. Push continuo
+
+- Cada commit aprobado debe ser **pusheado inmediatamente** al repositorio remoto (`origin/main`).
+- No se acumulan cambios locales sin sincronizar.
+- Antes de empezar a trabajar, se hace `git pull` para evitar conflictos.
+- El objetivo es **no perder ningún cambio** y mantener el estado del proyecto visible en todo momento.
+
+### 5. Versionado semántico
 
 Cuando el proyecto tenga una versión usable, se usará **SemVer**:
 
