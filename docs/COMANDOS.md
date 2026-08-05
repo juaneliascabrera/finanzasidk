@@ -47,7 +47,7 @@ Eso significa que reutilizaron un resultado anterior porque no detectaron cambio
 Cuando exista un entorno con Java configurado, el equivalente será:
 
 ```bash
-./gradlew test --rerun-tasks
+./gradlew test
 ```
 
 ---

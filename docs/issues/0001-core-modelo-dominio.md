@@ -16,7 +16,9 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
 
 1. **Entidades de dominio:**
    - `Cuenta`: representa una billetera, cuenta bancaria o cuenta de inversión. Tiene nombre, moneda y tipo (normal o inversión).
-   - `Transacción`: representa un ingreso o egreso. Tiene monto, tipo, categoría, cuenta, fecha y descripción opcional.
+   - `Movimiento`: abstracción común de ingresos y egresos, identificada por `id`.
+   - `Ingreso`: representa dinero externo que entra a una cuenta operativa.
+   - `Egreso`: representa un gasto asociado a una cuenta y categoría opcional.
    - `Categoría`: representa una categoría de gasto o ingreso (comida, transporte, etc.).
    - `Presupuesto`: representa un límite mensual para una categoría, en una moneda determinada.
 
@@ -24,7 +26,7 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
    - Calcular el saldo de una cuenta a partir de sus transacciones.
    - Calcular el total de gastos e ingresos de un período.
    - Calcular cuánto queda de un presupuesto según los gastos de su categoría.
-   - Restricción: las cuentas de inversión no permiten registrar egresos directos (solo ingresos y ajustes de saldo).
+   - Restricción: las cuentas de inversión no permiten registrar ingresos ni egresos directos.
 
 3. **Tests unitarios:**
    - Cobertura de los cálculos principales.
@@ -38,13 +40,15 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
 
 ## Criterios de aceptación
 
-- [ ] Existe un módulo Gradle `core` con Kotlin puro.
-- [ ] Compila correctamente usando `./gradlew :core:build`.
-- [ ] Los tests unitarios corren con `./gradlew :core:test`.
-- [ ] El modelo incluye `Cuenta`, `Transacción`, `Categoría` y `Presupuesto`.
-- [ ] Existe lógica testeada para: saldo de cuenta, total de gastos del mes, presupuesto restante.
-- [ ] Las cuentas de inversión tienen una restricción clara sobre los egresos.
-- [ ] No hay dependencias de Android en el módulo `core`.
+- [x] Existe un módulo Gradle `core` con Kotlin puro.
+- [x] Compila correctamente usando el Gradle Wrapper dentro de Docker.
+- [x] Los tests unitarios corren con JUnit 5.
+- [x] El modelo incluye `Cuenta`, `Movimiento`, `Ingreso`, `Egreso`, `Categoría` y `Presupuesto`.
+- [x] Existe lógica testeada para saldo de cuenta y restante de presupuesto.
+- [x] Las cuentas de inversión rechazan ingresos y egresos directos.
+- [x] No hay dependencias de Android en el módulo `core`.
+- [ ] Están implementadas transferencias, aportes, rescates y ajustes de valuación.
+- [ ] Existe documentación de uso del repositorio equivalente a un README.
 - [ ] El `README.md` del proyecto tiene instrucciones mínimas para ejecutar los tests.
 
 ## Impacto en VISION.md

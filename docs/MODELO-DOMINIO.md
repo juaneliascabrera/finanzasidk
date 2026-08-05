@@ -16,6 +16,22 @@ El objetivo es que la lógica del sistema pueda probarse sin Android, sin base d
 - Las categorías son personalizables.
 - Las fechas pasadas están permitidas.
 
+## Identidad de las entidades
+
+Las entidades persistibles tienen un `id` textual, no derivado de su nombre:
+
+- `Cuenta`.
+- `Categoria`.
+- `Ingreso`.
+- `Egreso`.
+- `Presupuesto`.
+
+El `id` identifica la entidad aunque cambien sus otros datos. Los nombres son etiquetas editables y no forman parte de la identidad.
+
+`Dinero` no tiene `id` porque es un objeto de valor: su identidad está determinada por su importe y su moneda.
+
+Los identificadores se reciben desde afuera del dominio por ahora. La generación de IDs y su persistencia se definirán al diseñar la capa de datos.
+
 ## Moneda y dinero
 
 El MVP contempla dos monedas:
@@ -262,6 +278,7 @@ Un presupuesto define cuánto se permite gastar en una categoría durante un mes
 - Mes (`YearMonth`).
 - Límite.
 - Moneda.
+- Identificador.
 
 El límite puede cambiarse mes a mes. No se presupone que el límite de un mes se copie automáticamente al siguiente.
 
@@ -294,7 +311,27 @@ El restante puede ser negativo. Eso significa que el usuario superó el límite.
 - Sincronización con bancos, billeteras o brokers.
 - Usuarios múltiples.
 
-## Primer comportamiento candidato para TDD
+## Estado actual del core
+
+Actualmente están implementados y testeados:
+
+- `Dinero` y `Moneda`.
+- `Categoria` identificada por `id`.
+- `Presupuesto` y cálculo de restante.
+- `Cuenta` operativa e inversión.
+- `Ingreso` y `Egreso` identificados por `id`.
+- Cálculo de saldo de cuentas.
+- Restricción de que las cuentas de inversión no aceptan ingresos ni egresos directos.
+
+Todavía no están implementados:
+
+- Transferencias normales.
+- Aportes de inversión.
+- Rescates de inversión.
+- Ajustes de valuación.
+- Persistencia.
+
+## Primer comportamiento implementado con TDD
 
 El primer test puede expresar esta regla:
 

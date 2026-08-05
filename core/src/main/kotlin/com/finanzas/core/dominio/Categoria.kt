@@ -4,6 +4,10 @@ class Categoria(
     val id: String,
     val nombre: String
 ) {
+    init {
+        require(id.isNotBlank()) { "El id de la categoria no puede estar vacio" }
+    }
+
     override fun equals(otra: Any?): Boolean {
         return otra is Categoria && id == otra.id
     }

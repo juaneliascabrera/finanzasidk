@@ -29,7 +29,7 @@ docker run --rm \
   -v finanzas-gradle-home:/home/gradle/.gradle \
   -w /app \
   gradle:8.12.1-jdk21 \
-  ./gradlew test --no-daemon --console=plain --rerun-tasks
+  ./gradlew test --no-daemon --console=plain
 ```
 
 El volumen `finanzas-gradle-home` conserva la distribución de Gradle y las dependencias descargadas entre ejecuciones. `--no-daemon` evita iniciar un proceso persistente dentro del contenedor. `test` ejecuta los tests de todos los módulos que tengan esa tarea. La tarea `test` está configurada para ejecutarse siempre, mientras que las tareas de compilación siguen usando la caché incremental.
@@ -48,7 +48,7 @@ PresupuestoTest > calcula_el_restante_de_un_presupuesto_con_un_egreso_del_mismo_
 
 `BUILD SUCCESSFUL` indica que la tarea completa terminó sin fallos. La línea `PASSED` permite verificar además qué caso individual fue ejecutado y aprobado.
 
-El primer test todavía no fue creado. La siguiente etapa es definir una regla de dominio y expresarla como test antes de implementar código productivo.
+Los tests actuales cubren presupuestos, identidad de entidades, cuentas, ingresos y egresos. Cada nueva regla de dominio debe agregarse primero como test antes de implementar código productivo.
 
 ## 1. Tests unitarios (obligatorios desde el inicio)
 

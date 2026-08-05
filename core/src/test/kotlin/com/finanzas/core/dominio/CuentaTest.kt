@@ -28,11 +28,13 @@ class CuentaTest {
         val cuenta = cuentaBrubank()
         val movimientos = listOf<Movimiento>(
             Ingreso(
+                id = "ingreso-brubank-1",
                 cuentaId = "brubank",
                 fecha = LocalDate.of(2026, 8, 1),
                 monto = Dinero.ars("50000.00")
             ),
             Egreso(
+                id = "egreso-brubank-1",
                 cuentaId = "brubank",
                 fecha = LocalDate.of(2026, 8, 5),
                 monto = Dinero.ars("25000.00"),
@@ -48,6 +50,7 @@ class CuentaTest {
         val cuenta = cuentaBrubank()
         val movimientos = listOf<Movimiento>(
             Ingreso(
+                id = "ingreso-efectivo-1",
                 cuentaId = "efectivo",
                 fecha = LocalDate.of(2026, 8, 1),
                 monto = Dinero.ars("50000.00")
@@ -87,6 +90,7 @@ class CuentaTest {
     fun rechaza_movimiento_de_otra_moneda() {
         val cuenta = cuentaBrubank()
         val movimiento = Ingreso(
+            id = "ingreso-fci-usd",
             cuentaId = "brubank",
             fecha = LocalDate.of(2026, 8, 1),
             monto = Dinero.usd("50.00")
@@ -121,6 +125,7 @@ class CuentaTest {
             saldoInicial = Dinero.ars("150000.00")
         )
         val egreso = Egreso(
+            id = "egreso-fci-1",
             cuentaId = "fci",
             fecha = LocalDate.of(2026, 8, 5),
             monto = Dinero.ars("50000.00"),
@@ -130,6 +135,41 @@ class CuentaTest {
         assertFailsWith<IllegalArgumentException> {
             cuenta.saldo(listOf(egreso))
         }
+    }
+
+    @Test
+    fun rechaza_ingreso_directo_en_cuenta_de_inversion() {
+        val cuenta = Cuenta(
+            id = "fci",
+            nombre = "FCI Conservador",
+            moneda = Moneda.ARS,
+            tipo = TipoCuenta.INVERSION,
+            saldoInicial = Dinero.ars("150000.00")
+        )
+        val ingreso = Ingreso(
+            id = "ingreso-fci-1",
+            cuentaId = "fci",
+            fecha = LocalDate.of(2026, 8, 5),
+            monto = Dinero.ars("50000.00")
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            cuenta.saldo(listOf(ingreso))
+        }
+    }
+
+    @Test
+    fun cuentas_con_el_mismo_id_representan_la_misma_cuenta() {
+        val primera = cuentaBrubank()
+        val segunda = Cuenta(
+            id = "brubank",
+            nombre = "Cuenta principal",
+            moneda = Moneda.ARS,
+            tipo = TipoCuenta.OPERATIVA,
+            saldoInicial = Dinero.ars("250000.00")
+        )
+
+        assertEquals(primera, segunda)
     }
 
     private fun cuentaBrubank(): Cuenta {

@@ -11,11 +11,13 @@ class PresupuestoTest {
     fun calcula_el_restante_de_un_presupuesto_con_un_egreso_del_mismo_mes() {
         val categoria = Categoria(id = "comida", nombre = "Comida")
         val presupuesto = Presupuesto(
+            id = "presupuesto-comida-agosto-2026",
             categoria = categoria,
             mes = YearMonth.of(2026, 8),
             limite = Dinero.ars("300000.00")
         )
         val egreso = Egreso(
+            id = "egreso-comida-1",
             fecha = LocalDate.of(2026, 8, 5),
             monto = Dinero.ars("50000.00"),
             categoria = categoria,
@@ -86,6 +88,7 @@ class PresupuestoTest {
     fun ignora_egresos_de_otra_moneda() {
         val presupuesto = presupuestoDeComida("300000.00")
         val egreso = Egreso(
+            id = "egreso-usd-1",
             fecha = LocalDate.of(2026, 8, 5),
             monto = Dinero.usd("50.00"),
             categoria = Categoria(id = "comida", nombre = "Comida"),
@@ -144,6 +147,7 @@ class PresupuestoTest {
     @Test
     fun categorias_con_el_mismo_id_representan_la_misma_categoria() {
         val presupuesto = Presupuesto(
+            id = "presupuesto-comida-agosto-2026",
             categoria = Categoria(id = "comida", nombre = "Comida"),
             mes = YearMonth.of(2026, 8),
             limite = Dinero.ars("300000.00")
@@ -166,6 +170,7 @@ class PresupuestoTest {
 
     private fun presupuestoDeComida(limite: String): Presupuesto {
         return Presupuesto(
+            id = "presupuesto-comida-agosto-2026",
             categoria = Categoria(id = "comida", nombre = "Comida"),
             mes = YearMonth.of(2026, 8),
             limite = Dinero.ars(limite)
@@ -178,6 +183,7 @@ class PresupuestoTest {
         categoria: Categoria? = Categoria(id = "comida", nombre = "Comida")
     ): Egreso {
         return Egreso(
+            id = "egreso-presupuesto",
             fecha = fecha,
             monto = Dinero.ars(monto),
             categoria = categoria,

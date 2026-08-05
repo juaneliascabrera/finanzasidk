@@ -1,6 +1,6 @@
 package com.finanzas.core.dominio
 
-data class Cuenta(
+class Cuenta(
     val id: String,
     val nombre: String,
     val moneda: Moneda,
@@ -8,6 +8,7 @@ data class Cuenta(
     val saldoInicial: Dinero
 ) {
     init {
+        require(id.isNotBlank()) { "El id de la cuenta no puede estar vacio" }
         require(saldoInicial.moneda == moneda) {
             "El saldo inicial debe usar la moneda de la cuenta"
         }
@@ -27,7 +28,12 @@ data class Cuenta(
             }
             .fold(saldoInicial) { saldo, movimiento ->
                 when (movimiento) {
-                    is Ingreso -> saldo + movimiento.monto
+                    is Ingreso -> {
+                        require(tipo == TipoCuenta.OPERATIVA) {
+                            "Una cuenta de inversion no puede registrar ingresos directos"
+                        }
+                        saldo + movimiento.monto
+                    }
                     is Egreso -> {
                         require(tipo == TipoCuenta.OPERATIVA) {
                             "Una cuenta de inversion no puede registrar egresos directos"
@@ -36,5 +42,15 @@ data class Cuenta(
                     }
                 }
             }
+    }
+
+    override fun equals(otra: Any?): Boolean {
+        return otra is Cuenta && id == otra.id
+    }
+
+    override fun hashCode(): Int = id.hashCode()
+
+    override fun toString(): String {
+        return "Cuenta(id=$id, nombre=$nombre, moneda=$moneda, tipo=$tipo, saldoInicial=$saldoInicial)"
     }
 }
