@@ -64,6 +64,13 @@ Si no se puede responder eso, la elección no está justificada.
 - El usuario debe poder decidir si ejecuta el comando él mismo o si lo autoriza al agente.
 - Esto incluye: instalaciones, builds largos, descargas de imágenes Docker, generación de wrappers, migraciones, etc.
 
+## 10. Entregar comandos mediante `lastcommand.txt`
+
+- Todo comando que el usuario deba ejecutar manualmente debe escribirse primero en `lastcommand.txt`, en la raíz del repositorio.
+- El agente debe indicar que el comando está en ese archivo, en lugar de depender de copiarlo desde el chat.
+- `lastcommand.txt` es un archivo local y está incluido en `.gitignore`; nunca se commitea ni se pushea.
+- Si el comando es largo o requiere aprobación, primero se explica y se espera autorización. La autorización no se infiere por el hecho de haber escrito el archivo.
+
 ## 8. Ejemplo de lo que se espera
 
 En vez de decir:
