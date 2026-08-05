@@ -237,6 +237,8 @@ Un ajuste de valuación nunca se interpreta como dinero disponible en una cuenta
 
 Una categoría es una clasificación personalizable para egresos.
 
+La identidad de una categoría es siempre su `id`. El nombre es una etiqueta descriptiva y puede cambiar. Dos categorías con el mismo `id` representan la misma categoría aunque tengan nombres diferentes.
+
 Ejemplos iniciales posibles:
 
 - Comida.
@@ -246,7 +248,7 @@ Ejemplos iniciales posibles:
 - Salud.
 - Salidas.
 
-La aplicación no debe imponer una lista fija de categorías. El usuario puede crear, editar y eventualmente archivar categorías.
+La aplicación no debe imponer una lista fija de categorías. El usuario puede crear, editar y eventualmente archivar categorías. Editar el nombre no debe crear una categoría nueva ni separar sus presupuestos o egresos históricos.
 
 La relación entre un egreso y su categoría es opcional durante el período temporal de tolerancia definido en el MVP. Los presupuestos, en cambio, siempre pertenecen a una categoría concreta.
 

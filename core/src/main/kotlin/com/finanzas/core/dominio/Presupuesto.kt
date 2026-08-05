@@ -7,6 +7,12 @@ data class Presupuesto(
     val mes: YearMonth,
     val limite: Dinero
 ) {
+    init {
+        require(limite.importe >= Dinero.cero(limite.moneda).importe) {
+            "El limite de un presupuesto no puede ser negativo"
+        }
+    }
+
     fun restante(egresos: List<Egreso>): Dinero {
         val gastado = egresos
             .asSequence()
