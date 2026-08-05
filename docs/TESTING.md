@@ -16,11 +16,37 @@ Para ejecutar sus tests:
 ./gradlew :core:test
 ```
 
+Desde Docker, el comando recomendado para ejecutar todos los tests es:
+
+La versión canónica y reutilizable de este comando está en [`COMANDOS.md`](COMANDOS.md).
+
+```bash
+docker volume create finanzas-gradle-home >/dev/null
+
+docker run --rm \
+  -e GRADLE_USER_HOME=/home/gradle/.gradle \
+  -v "$PWD":/app \
+  -v finanzas-gradle-home:/home/gradle/.gradle \
+  -w /app \
+  gradle:8.12.1-jdk21 \
+  ./gradlew test --no-daemon --console=plain --rerun-tasks
+```
+
+El volumen `finanzas-gradle-home` conserva la distribución de Gradle y las dependencias descargadas entre ejecuciones. `--no-daemon` evita iniciar un proceso persistente dentro del contenedor. `test` ejecuta los tests de todos los módulos que tengan esa tarea. `--rerun-tasks` fuerza la ejecución aunque Gradle los considere `UP-TO-DATE`.
+
 Para ejecutar la validación completa del módulo:
 
 ```bash
 ./gradlew :core:check
 ```
+
+La configuración de Gradle muestra explícitamente el resultado de cada test:
+
+```text
+PresupuestoTest > calcula_el_restante_de_un_presupuesto_con_un_egreso_del_mismo_mes PASSED
+```
+
+`BUILD SUCCESSFUL` indica que la tarea completa terminó sin fallos. La línea `PASSED` permite verificar además qué caso individual fue ejecutado y aprobado.
 
 El primer test todavía no fue creado. La siguiente etapa es definir una regla de dominio y expresarla como test antes de implementar código productivo.
 
