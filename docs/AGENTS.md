@@ -51,6 +51,13 @@ Si no se puede responder eso, la elección no está justificada.
 - Antes de implementar cualquier funcionalidad, revisar `VISION.md`.
 - Si la funcionalidad contradice algún constraint (simplicidad, offline-first, mobile-first), no implementarla sin renegociar primero.
 
+## 8. No asumir el entorno de desarrollo del usuario
+
+- Antes de proponer herramientas que requieren instalación local (Android Studio, emuladores, SDKs), verificar si el usuario tiene acceso a su PC y puede instalarlas.
+- Si el usuario está trabajando desde SSH o desde una PC ajena, proponer alternativas que no dependan de su entorno local.
+- Preferir flujos que puedan validarse en la nube (CI/CD) cuando el entorno local no está disponible.
+- No dar por sentado que el usuario puede ejecutar una app en un emulador o dispositivo en este momento.
+
 ## 8. Ejemplo de lo que se espera
 
 En vez de decir:
