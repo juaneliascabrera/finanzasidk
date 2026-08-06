@@ -322,6 +322,7 @@ Actualmente están implementados y testeados:
 - `Ingreso` y `Egreso` identificados por `id`.
 - Cálculo de saldo de cuentas.
 - Restricción de que las cuentas de inversión no aceptan ingresos ni egresos directos.
+- `Transferencia` normal entre cuentas operativas de la misma moneda.
 
 Todavía no están implementados:
 
@@ -330,6 +331,8 @@ Todavía no están implementados:
 - Rescates de inversión.
 - Ajustes de valuación.
 - Persistencia.
+
+La transferencia normal actual todavía es una clase independiente. El refactor hacia una jerarquía común `Transaccion` se hará después de validar este comportamiento con TDD.
 
 ## Primer comportamiento implementado con TDD
 

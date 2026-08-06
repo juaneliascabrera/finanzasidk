@@ -46,8 +46,10 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
 - [x] El modelo incluye `Cuenta`, `Movimiento`, `Ingreso`, `Egreso`, `Categoría` y `Presupuesto`.
 - [x] Existe lógica testeada para saldo de cuenta y restante de presupuesto.
 - [x] Las cuentas de inversión rechazan ingresos y egresos directos.
+- [x] Existe una transferencia normal entre cuentas operativas de la misma moneda.
 - [x] No hay dependencias de Android en el módulo `core`.
-- [ ] Están implementadas transferencias, aportes, rescates y ajustes de valuación.
+- [ ] Está implementada la jerarquía común `Transaccion`.
+- [ ] Están implementados aportes, rescates y ajustes de valuación.
 - [ ] Existe documentación de uso del repositorio equivalente a un README.
 - [ ] El `README.md` del proyecto tiene instrucciones mínimas para ejecutar los tests.
 
