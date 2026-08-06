@@ -3,12 +3,18 @@ package com.finanzas.core.dominio
 import java.time.LocalDate
 
 class Transferencia(
-    val id: String,
-    val fecha: LocalDate,
     val cuentaOrigen: Cuenta,
     val cuentaDestino: Cuenta,
-    val monto: Dinero
+    val fecha: LocalDate,
+    val monto: Dinero,
+    val id: String
 ) {
+    lateinit var transferEgreso: TransferEgreso
+        private set
+
+    lateinit var transferIngreso: TransferIngreso
+        private set
+
     init {
         require(id.isNotBlank()) { "El id de la transferencia no puede estar vacio" }
         require(cuentaOrigen.id != cuentaDestino.id) {
@@ -29,25 +35,25 @@ class Transferencia(
         require(monto.importe > Dinero.cero(monto.moneda).importe) {
             "El monto debe ser positivo"
         }
+
+        transferEgreso = TransferEgreso(
+            id = "$id:salida",
+            transferencia = this,
+            cuentaId = cuentaOrigen.id,
+            fecha = fecha,
+            monto = monto
+        )
+        transferIngreso = TransferIngreso(
+            id = "$id:entrada",
+            transferencia = this,
+            cuentaId = cuentaDestino.id,
+            fecha = fecha,
+            monto = monto
+        )
+
+        cuentaOrigen.registrar(transferEgreso)
+        cuentaDestino.registrar(transferIngreso)
     }
-
-    fun afectarSaldo(cuentaId: String, saldo: Dinero): Dinero {
-        require(saldo.moneda == monto.moneda) {
-            "El saldo debe usar la moneda de la transferencia"
-        }
-
-        return when (cuentaId) {
-            cuentaOrigen.id -> saldo - monto
-            cuentaDestino.id -> saldo + monto
-            else -> saldo
-        }
-    }
-
-    override fun equals(otra: Any?): Boolean {
-        return otra is Transferencia && id == otra.id
-    }
-
-    override fun hashCode(): Int = id.hashCode()
 
     override fun toString(): String {
         return "Transferencia(id=$id, fecha=$fecha, origen=${cuentaOrigen.id}, destino=${cuentaDestino.id}, monto=$monto)"

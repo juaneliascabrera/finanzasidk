@@ -17,31 +17,19 @@ class Cuenta(
         }
     }
 
-    fun saldo(movimientos: List<Movimiento>): Dinero {
-        return movimientos
-            .asSequence()
-            .filter { it.cuentaId == id }
-            .onEach { movimiento ->
-                require(movimiento.monto.moneda == moneda) {
-                    "El movimiento debe usar la moneda de la cuenta"
-                }
-            }
-            .fold(saldoInicial) { saldo, movimiento ->
-                when (movimiento) {
-                    is Ingreso -> {
-                        require(tipo == TipoCuenta.OPERATIVA) {
-                            "Una cuenta de inversion no puede registrar ingresos directos"
-                        }
-                        saldo + movimiento.monto
-                    }
-                    is Egreso -> {
-                        require(tipo == TipoCuenta.OPERATIVA) {
-                            "Una cuenta de inversion no puede registrar egresos directos"
-                        }
-                        saldo - movimiento.monto
-                    }
-                }
-            }
+    private val transacciones = mutableListOf<Transaccion>()
+
+    fun registrar(transaccion: Transaccion) {
+        transaccion.validarRegistroEn(this)
+        transacciones.add(transaccion)
+    }
+
+    fun transacciones(): List<Transaccion> = transacciones.toList()
+
+    fun saldo(): Dinero {
+        return transacciones.fold(saldoInicial) { saldo, transaccion ->
+            transaccion.afectarSaldo(saldo)
+        }
     }
 
     override fun equals(otra: Any?): Boolean {

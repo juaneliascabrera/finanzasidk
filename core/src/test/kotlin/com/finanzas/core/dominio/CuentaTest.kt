@@ -8,13 +8,7 @@ import kotlin.test.assertFailsWith
 class CuentaTest {
     @Test
     fun conserva_los_datos_de_una_cuenta_operativa() {
-        val cuenta = Cuenta(
-            id = "brubank",
-            nombre = "Brubank",
-            moneda = Moneda.ARS,
-            tipo = TipoCuenta.OPERATIVA,
-            saldoInicial = Dinero.ars("100000.00")
-        )
+        val cuenta = cuentaBrubank()
 
         assertEquals("brubank", cuenta.id)
         assertEquals("Brubank", cuenta.nombre)
@@ -24,15 +18,17 @@ class CuentaTest {
     }
 
     @Test
-    fun calcula_saldo_sumando_ingresos_y_resta_egresos() {
+    fun calcula_saldo_a_partir_de_las_transacciones_registradas() {
         val cuenta = cuentaBrubank()
-        val movimientos = listOf<Movimiento>(
+        cuenta.registrar(
             Ingreso(
                 id = "ingreso-brubank-1",
                 cuentaId = "brubank",
                 fecha = LocalDate.of(2026, 8, 1),
                 monto = Dinero.ars("50000.00")
-            ),
+            )
+        )
+        cuenta.registrar(
             Egreso(
                 id = "egreso-brubank-1",
                 cuentaId = "brubank",
@@ -42,22 +38,37 @@ class CuentaTest {
             )
         )
 
-        assertEquals(Dinero.ars("125000.00"), cuenta.saldo(movimientos))
+        assertEquals(Dinero.ars("125000.00"), cuenta.saldo())
     }
 
     @Test
-    fun ignora_movimientos_de_otras_cuentas() {
+    fun conoce_las_transacciones_que_registro() {
         val cuenta = cuentaBrubank()
-        val movimientos = listOf<Movimiento>(
-            Ingreso(
-                id = "ingreso-efectivo-1",
-                cuentaId = "efectivo",
-                fecha = LocalDate.of(2026, 8, 1),
-                monto = Dinero.ars("50000.00")
-            )
+        val ingreso = Ingreso(
+            id = "ingreso-brubank-1",
+            cuentaId = "brubank",
+            fecha = LocalDate.of(2026, 8, 1),
+            monto = Dinero.ars("50000.00")
         )
 
-        assertEquals(Dinero.ars("100000.00"), cuenta.saldo(movimientos))
+        cuenta.registrar(ingreso)
+
+        assertEquals(listOf(ingreso), cuenta.transacciones())
+    }
+
+    @Test
+    fun no_puede_registrar_una_transaccion_de_otra_cuenta() {
+        val cuenta = cuentaBrubank()
+        val ingreso = Ingreso(
+            id = "ingreso-efectivo-1",
+            cuentaId = "efectivo",
+            fecha = LocalDate.of(2026, 8, 1),
+            monto = Dinero.ars("50000.00")
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            cuenta.registrar(ingreso)
+        }
     }
 
     @Test
@@ -87,17 +98,17 @@ class CuentaTest {
     }
 
     @Test
-    fun rechaza_movimiento_de_otra_moneda() {
+    fun rechaza_transaccion_de_otra_moneda() {
         val cuenta = cuentaBrubank()
-        val movimiento = Ingreso(
-            id = "ingreso-fci-usd",
+        val ingreso = Ingreso(
+            id = "ingreso-brubank-usd",
             cuentaId = "brubank",
             fecha = LocalDate.of(2026, 8, 1),
             monto = Dinero.usd("50.00")
         )
 
         assertFailsWith<IllegalArgumentException> {
-            cuenta.saldo(listOf(movimiento))
+            cuenta.registrar(ingreso)
         }
     }
 
@@ -112,18 +123,12 @@ class CuentaTest {
         )
 
         assertEquals(TipoCuenta.INVERSION, cuenta.tipo)
-        assertEquals(Dinero.ars("150000.00"), cuenta.saldoInicial)
+        assertEquals(Dinero.ars("150000.00"), cuenta.saldo())
     }
 
     @Test
     fun rechaza_egreso_directo_en_cuenta_de_inversion() {
-        val cuenta = Cuenta(
-            id = "fci",
-            nombre = "FCI Conservador",
-            moneda = Moneda.ARS,
-            tipo = TipoCuenta.INVERSION,
-            saldoInicial = Dinero.ars("150000.00")
-        )
+        val cuenta = cuentaInversion()
         val egreso = Egreso(
             id = "egreso-fci-1",
             cuentaId = "fci",
@@ -133,19 +138,13 @@ class CuentaTest {
         )
 
         assertFailsWith<IllegalArgumentException> {
-            cuenta.saldo(listOf(egreso))
+            cuenta.registrar(egreso)
         }
     }
 
     @Test
     fun rechaza_ingreso_directo_en_cuenta_de_inversion() {
-        val cuenta = Cuenta(
-            id = "fci",
-            nombre = "FCI Conservador",
-            moneda = Moneda.ARS,
-            tipo = TipoCuenta.INVERSION,
-            saldoInicial = Dinero.ars("150000.00")
-        )
+        val cuenta = cuentaInversion()
         val ingreso = Ingreso(
             id = "ingreso-fci-1",
             cuentaId = "fci",
@@ -154,7 +153,7 @@ class CuentaTest {
         )
 
         assertFailsWith<IllegalArgumentException> {
-            cuenta.saldo(listOf(ingreso))
+            cuenta.registrar(ingreso)
         }
     }
 
@@ -179,6 +178,16 @@ class CuentaTest {
             moneda = Moneda.ARS,
             tipo = TipoCuenta.OPERATIVA,
             saldoInicial = Dinero.ars("100000.00")
+        )
+    }
+
+    private fun cuentaInversion(): Cuenta {
+        return Cuenta(
+            id = "fci",
+            nombre = "FCI Conservador",
+            moneda = Moneda.ARS,
+            tipo = TipoCuenta.INVERSION,
+            saldoInicial = Dinero.ars("150000.00")
         )
     }
 }

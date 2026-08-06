@@ -3,11 +3,11 @@ package com.finanzas.core.dominio
 import java.time.LocalDate
 
 class Ingreso(
-    override val id: String,
     override val cuentaId: String,
-    override val fecha: LocalDate,
-    override val monto: Dinero
-) : Movimiento {
+    fecha: LocalDate,
+    override val monto: Dinero,
+    id: String
+) : Transaccion(id, fecha, monto) {
     init {
         require(id.isNotBlank()) { "El id del ingreso no puede estar vacio" }
         require(monto.importe >= Dinero.cero(monto.moneda).importe) {
@@ -15,11 +15,19 @@ class Ingreso(
         }
     }
 
-    override fun equals(otro: Any?): Boolean {
-        return otro is Ingreso && id == otro.id
+    override fun validarRegistroEn(cuenta: Cuenta) {
+        super.validarRegistroEn(cuenta)
+        require(cuenta.tipo == TipoCuenta.OPERATIVA) {
+            "Una cuenta de inversion no puede registrar ingresos directos"
+        }
     }
 
-    override fun hashCode(): Int = id.hashCode()
+    override fun afectarSaldo(saldo: Dinero): Dinero {
+        require(saldo.moneda == monto.moneda) {
+            "El saldo y el ingreso deben usar la misma moneda"
+        }
+        return saldo + monto
+    }
 
     override fun toString(): String {
         return "Ingreso(id=$id, cuentaId=$cuentaId, fecha=$fecha, monto=$monto)"
