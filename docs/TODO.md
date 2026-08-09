@@ -210,4 +210,18 @@ la cuenta origen no conserve una salida huérfana.
 
 ---
 
+## 7. Variantes de transferencia
+
+La transferencia normal, los aportes y los rescates comparten la misma
+estructura de operación con dos patas, pero tienen distintas reglas para los
+tipos de cuenta.
+
+### Estado: RESUELTO
+
+`Transferencia` ahora compone un `TipoTransferencia` sellado con las variantes
+`NORMAL`, `APORTE_INVERSION` y `RESCATE_INVERSION`. Las reglas de cada variante
+se validan a través de ese tipo, sin condicionales dispersos en la transferencia.
+
+---
+
 Última actualización: agosto 2026.

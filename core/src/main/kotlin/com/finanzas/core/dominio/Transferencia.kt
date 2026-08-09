@@ -7,7 +7,8 @@ class Transferencia(
     val cuentaDestino: Cuenta,
     val fecha: LocalDate,
     val monto: Dinero,
-    val id: String
+    val id: String,
+    val tipo: TipoTransferencia = TipoTransferencia.NORMAL
 ) {
     lateinit var transferEgreso: TransferEgreso
         private set
@@ -20,12 +21,7 @@ class Transferencia(
         require(cuentaOrigen.id != cuentaDestino.id) {
             "El origen y el destino deben ser cuentas distintas"
         }
-        require(cuentaOrigen.tipo == TipoCuenta.OPERATIVA) {
-            "La cuenta origen debe ser operativa"
-        }
-        require(cuentaDestino.tipo == TipoCuenta.OPERATIVA) {
-            "La cuenta destino debe ser operativa"
-        }
+        tipo.validarCuentas(cuentaOrigen, cuentaDestino)
         require(cuentaOrigen.moneda == cuentaDestino.moneda) {
             "Las cuentas deben usar la misma moneda"
         }

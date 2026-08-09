@@ -323,14 +323,14 @@ Actualmente están implementados y testeados:
 - Jerarquía común `Transaccion` para ingresos, egresos y patas de transferencia.
 - Cálculo de saldo de cuentas.
 - Restricción de que las cuentas de inversión no aceptan ingresos ni egresos directos.
-- `Transferencia` normal entre cuentas operativas de la misma moneda, con dos patas
-  asociadas y registro validado antes de modificar las cuentas.
+- `Transferencia` compuesta con `TipoTransferencia` y dos patas asociadas.
+- Transferencias normales entre cuentas operativas de la misma moneda.
+- Aportes de inversión entre cuentas operativas y cuentas de inversión.
+- Rescates de inversión entre cuentas de inversión y cuentas operativas.
 - Unicidad local de ids de transacciones dentro de cada cuenta.
 
 Todavía no están implementados:
 
-- Aportes de inversión.
-- Rescates de inversión.
 - Ajustes de valuación.
 - Persistencia.
 

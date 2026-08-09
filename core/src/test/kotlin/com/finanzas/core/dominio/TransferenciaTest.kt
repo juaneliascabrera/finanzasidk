@@ -50,6 +50,72 @@ class TransferenciaTest {
     }
 
     @Test
+    fun un_aporte_de_inversion_resta_en_la_operativa_y_suma_en_la_inversion() {
+        val origen = cuentaBrubank()
+        val destino = cuentaInversion()
+
+        val aporte = Transferencia(
+            id = "aporte-1",
+            cuentaOrigen = origen,
+            cuentaDestino = destino,
+            fecha = LocalDate.of(2026, 8, 10),
+            monto = Dinero.ars("25.00"),
+            tipo = TipoTransferencia.APORTE_INVERSION
+        )
+
+        assertEquals(TipoTransferencia.APORTE_INVERSION, aporte.tipo)
+        assertEquals(Dinero.ars("75.00"), origen.saldo())
+        assertEquals(Dinero.ars("175.00"), destino.saldo())
+    }
+
+    @Test
+    fun un_rescate_de_inversion_resta_en_la_inversion_y_suma_en_la_operativa() {
+        val origen = cuentaInversion()
+        val destino = cuentaEfectivo()
+
+        val rescate = Transferencia(
+            id = "rescate-1",
+            cuentaOrigen = origen,
+            cuentaDestino = destino,
+            fecha = LocalDate.of(2026, 8, 10),
+            monto = Dinero.ars("25.00"),
+            tipo = TipoTransferencia.RESCATE_INVERSION
+        )
+
+        assertEquals(TipoTransferencia.RESCATE_INVERSION, rescate.tipo)
+        assertEquals(Dinero.ars("125.00"), origen.saldo())
+        assertEquals(Dinero.ars("75.00"), destino.saldo())
+    }
+
+    @Test
+    fun un_aporte_requiere_una_cuenta_de_inversion_como_destino() {
+        assertFailsWith<IllegalArgumentException> {
+            Transferencia(
+                id = "aporte-1",
+                cuentaOrigen = cuentaBrubank(),
+                cuentaDestino = cuentaEfectivo(),
+                fecha = LocalDate.of(2026, 8, 10),
+                monto = Dinero.ars("25.00"),
+                tipo = TipoTransferencia.APORTE_INVERSION
+            )
+        }
+    }
+
+    @Test
+    fun un_rescate_requiere_una_cuenta_de_inversion_como_origen() {
+        assertFailsWith<IllegalArgumentException> {
+            Transferencia(
+                id = "rescate-1",
+                cuentaOrigen = cuentaBrubank(),
+                cuentaDestino = cuentaEfectivo(),
+                fecha = LocalDate.of(2026, 8, 10),
+                monto = Dinero.ars("25.00"),
+                tipo = TipoTransferencia.RESCATE_INVERSION
+            )
+        }
+    }
+
+    @Test
     fun no_deja_la_transferencia_a_medio_registrar_si_el_id_de_una_pata_ya_existe() {
         val origen = cuentaBrubank()
         val destino = cuentaEfectivo()

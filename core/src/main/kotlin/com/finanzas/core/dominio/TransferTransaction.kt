@@ -11,9 +11,6 @@ abstract class TransferTransaction(
 ) : Transaccion(id, fecha, monto) {
     override fun validarRegistroEn(cuenta: Cuenta) {
         super.validarRegistroEn(cuenta)
-        require(cuenta.tipo == TipoCuenta.OPERATIVA) {
-            "Una pata de transferencia normal requiere una cuenta operativa"
-        }
         require(fecha == transferencia.fecha) {
             "La pata debe tener la fecha de la transferencia"
         }
@@ -34,6 +31,7 @@ class TransferIngreso(
 
     override fun validarRegistroEn(cuenta: Cuenta) {
         super.validarRegistroEn(cuenta)
+        transferencia.tipo.validarDestino(cuenta)
         require(cuenta.id == transferencia.cuentaDestino.id) {
             "La entrada debe registrarse en la cuenta destino de la transferencia"
         }
@@ -53,6 +51,7 @@ class TransferEgreso(
 
     override fun validarRegistroEn(cuenta: Cuenta) {
         super.validarRegistroEn(cuenta)
+        transferencia.tipo.validarOrigen(cuenta)
         require(cuenta.id == transferencia.cuentaOrigen.id) {
             "La salida debe registrarse en la cuenta origen de la transferencia"
         }
