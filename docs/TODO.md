@@ -224,4 +224,21 @@ se validan a través de ese tipo, sin condicionales dispersos en la transferenci
 
 ---
 
+## 8. Ajustes de valuación
+
+Una cuenta de inversión puede cambiar de valor sin que exista un movimiento de
+dinero entre cuentas. El usuario informa el valor actual y el dominio calcula la
+variación respecto del saldo anterior.
+
+### Estado: RESUELTO
+
+`AjusteValuacion` es una `Transaccion` que conserva `valorAnterior` y
+`valorNuevo`. Su monto es la diferencia firmada entre ambos valores. Solo se
+registra en cuentas de inversión y exige que el valor anterior coincida con el
+saldo actual de la cuenta. No es un ingreso, egreso ni transferencia y por eso
+no afecta presupuestos. `Cuenta.registrarAjusteValuacion` recibe el valor nuevo,
+obtiene el anterior desde el saldo actual y registra el ajuste histórico.
+
+---
+
 Última actualización: agosto 2026.

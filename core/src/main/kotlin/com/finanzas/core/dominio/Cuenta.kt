@@ -1,5 +1,7 @@
 package com.finanzas.core.dominio
 
+import java.time.LocalDate
+
 class Cuenta(
     val id: String,
     val nombre: String,
@@ -22,6 +24,22 @@ class Cuenta(
     fun registrar(transaccion: Transaccion) {
         validarPuedeRegistrar(transaccion)
         transacciones.add(transaccion)
+    }
+
+    fun registrarAjusteValuacion(
+        id: String,
+        fecha: LocalDate,
+        valorNuevo: Dinero
+    ): AjusteValuacion {
+        val ajuste = AjusteValuacion(
+            id = id,
+            cuentaId = this.id,
+            fecha = fecha,
+            valorAnterior = saldo(),
+            valorNuevo = valorNuevo
+        )
+        registrar(ajuste)
+        return ajuste
     }
 
     internal fun validarPuedeRegistrar(transaccion: Transaccion) {

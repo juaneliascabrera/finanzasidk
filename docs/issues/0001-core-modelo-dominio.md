@@ -16,7 +16,7 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
 
 1. **Entidades de dominio:**
    - `Cuenta`: representa una billetera, cuenta bancaria o cuenta de inversión. Tiene nombre, moneda y tipo (normal o inversión).
-   - `Movimiento`: abstracción común de ingresos y egresos, identificada por `id`.
+   - `Transaccion`: abstracción común de ingresos, egresos y operaciones internas, identificada por `id`.
    - `Ingreso`: representa dinero externo que entra a una cuenta operativa.
    - `Egreso`: representa un gasto asociado a una cuenta y categoría opcional.
    - `Categoría`: representa una categoría de gasto o ingreso (comida, transporte, etc.).
@@ -43,14 +43,14 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
 - [x] Existe un módulo Gradle `core` con Kotlin puro.
 - [x] Compila correctamente usando el Gradle Wrapper dentro de Docker.
 - [x] Los tests unitarios corren con JUnit 5.
-- [x] El modelo incluye `Cuenta`, `Movimiento`, `Ingreso`, `Egreso`, `Categoría` y `Presupuesto`.
+- [x] El modelo incluye `Cuenta`, `Transaccion`, `Ingreso`, `Egreso`, `Categoría` y `Presupuesto`.
 - [x] Existe lógica testeada para saldo de cuenta y restante de presupuesto.
 - [x] Las cuentas de inversión rechazan ingresos y egresos directos.
 - [x] Existe una transferencia normal entre cuentas operativas de la misma moneda.
 - [x] No hay dependencias de Android en el módulo `core`.
 - [x] Está implementada la jerarquía común `Transaccion`.
 - [x] Están implementados aportes y rescates de inversión.
-- [ ] Están implementados los ajustes de valuación.
+- [x] Están implementados los ajustes de valuación.
 - [ ] Existe documentación de uso del repositorio equivalente a un README.
 - [ ] El `README.md` del proyecto tiene instrucciones mínimas para ejecutar los tests.
 

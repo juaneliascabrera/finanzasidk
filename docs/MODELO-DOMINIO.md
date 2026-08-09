@@ -327,11 +327,11 @@ Actualmente están implementados y testeados:
 - Transferencias normales entre cuentas operativas de la misma moneda.
 - Aportes de inversión entre cuentas operativas y cuentas de inversión.
 - Rescates de inversión entre cuentas de inversión y cuentas operativas.
+- Ajustes de valuación sobre cuentas de inversión.
 - Unicidad local de ids de transacciones dentro de cada cuenta.
 
 Todavía no están implementados:
 
-- Ajustes de valuación.
 - Persistencia.
 
 ## Primer comportamiento implementado con TDD
