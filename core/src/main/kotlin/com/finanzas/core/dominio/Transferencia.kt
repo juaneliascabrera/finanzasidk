@@ -51,6 +51,8 @@ class Transferencia(
             monto = monto
         )
 
+        cuentaOrigen.validarPuedeRegistrar(transferEgreso)
+        cuentaDestino.validarPuedeRegistrar(transferIngreso)
         cuentaOrigen.registrar(transferEgreso)
         cuentaDestino.registrar(transferIngreso)
     }

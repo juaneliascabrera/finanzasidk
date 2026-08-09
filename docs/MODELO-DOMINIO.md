@@ -320,19 +320,19 @@ Actualmente están implementados y testeados:
 - `Presupuesto` y cálculo de restante.
 - `Cuenta` operativa e inversión.
 - `Ingreso` y `Egreso` identificados por `id`.
+- Jerarquía común `Transaccion` para ingresos, egresos y patas de transferencia.
 - Cálculo de saldo de cuentas.
 - Restricción de que las cuentas de inversión no aceptan ingresos ni egresos directos.
-- `Transferencia` normal entre cuentas operativas de la misma moneda.
+- `Transferencia` normal entre cuentas operativas de la misma moneda, con dos patas
+  asociadas y registro validado antes de modificar las cuentas.
+- Unicidad local de ids de transacciones dentro de cada cuenta.
 
 Todavía no están implementados:
 
-- Transferencias normales.
 - Aportes de inversión.
 - Rescates de inversión.
 - Ajustes de valuación.
 - Persistencia.
-
-La transferencia normal actual todavía es una clase independiente. El refactor hacia una jerarquía común `Transaccion` se hará después de validar este comportamiento con TDD.
 
 ## Primer comportamiento implementado con TDD
 

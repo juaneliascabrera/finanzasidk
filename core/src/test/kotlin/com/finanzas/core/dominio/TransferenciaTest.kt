@@ -27,6 +27,55 @@ class TransferenciaTest {
     }
 
     @Test
+    fun no_puede_registrar_otra_transaccion_con_el_id_de_una_pata() {
+        val origen = cuentaBrubank()
+        val destino = cuentaEfectivo()
+        val transferencia = Transferencia(
+            id = "transferencia-1",
+            fecha = LocalDate.of(2026, 8, 5),
+            cuentaOrigen = origen,
+            cuentaDestino = destino,
+            monto = Dinero.ars("25.00")
+        )
+        val ingreso = Ingreso(
+            id = "transferencia-1:entrada",
+            cuentaId = destino.id,
+            fecha = transferencia.fecha,
+            monto = transferencia.monto
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            destino.registrar(ingreso)
+        }
+    }
+
+    @Test
+    fun no_deja_la_transferencia_a_medio_registrar_si_el_id_de_una_pata_ya_existe() {
+        val origen = cuentaBrubank()
+        val destino = cuentaEfectivo()
+        destino.registrar(
+            Ingreso(
+                id = "transferencia-1:entrada",
+                cuentaId = destino.id,
+                fecha = LocalDate.of(2026, 8, 1),
+                monto = Dinero.ars("10.00")
+            )
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            Transferencia(
+                id = "transferencia-1",
+                fecha = LocalDate.of(2026, 8, 5),
+                cuentaOrigen = origen,
+                cuentaDestino = destino,
+                monto = Dinero.ars("25.00")
+            )
+        }
+
+        assertEquals(emptyList(), origen.transacciones())
+    }
+
+    @Test
     fun la_salida_reduce_el_saldo_de_la_cuenta_origen() {
         val origen = cuentaBrubank()
         val destino = cuentaEfectivo()
@@ -122,6 +171,104 @@ class TransferenciaTest {
                 cuentaDestino = cuentaInversion,
                 monto = Dinero.ars("25.00")
             )
+        }
+    }
+
+    @Test
+    fun no_registra_una_pata_de_transferencia_en_una_cuenta_de_inversion() {
+        val inversion = cuentaInversion()
+        val transferencia = Transferencia(
+            id = "transferencia-1",
+            fecha = LocalDate.of(2026, 8, 5),
+            cuentaOrigen = cuentaBrubank(),
+            cuentaDestino = cuentaEfectivo(),
+            monto = Dinero.ars("25.00")
+        )
+        val pata = TransferIngreso(
+            id = "pata-inversion",
+            transferencia = transferencia,
+            cuentaId = inversion.id,
+            fecha = transferencia.fecha,
+            monto = transferencia.monto
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            inversion.registrar(pata)
+        }
+    }
+
+    @Test
+    fun no_registra_una_pata_en_una_cuenta_operativa_que_no_corresponde() {
+        val otraCuenta = Cuenta(
+            id = "otra-cuenta",
+            nombre = "Otra cuenta",
+            moneda = Moneda.ARS,
+            tipo = TipoCuenta.OPERATIVA,
+            saldoInicial = Dinero.ars("80.00")
+        )
+        val transferencia = Transferencia(
+            id = "transferencia-1",
+            fecha = LocalDate.of(2026, 8, 5),
+            cuentaOrigen = cuentaBrubank(),
+            cuentaDestino = cuentaEfectivo(),
+            monto = Dinero.ars("25.00")
+        )
+        val pata = TransferIngreso(
+            id = "pata-otra-cuenta",
+            transferencia = transferencia,
+            cuentaId = otraCuenta.id,
+            fecha = transferencia.fecha,
+            monto = transferencia.monto
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            otraCuenta.registrar(pata)
+        }
+    }
+
+    @Test
+    fun no_registra_una_pata_con_un_monto_distinto_al_de_la_transferencia() {
+        val destino = cuentaEfectivo()
+        val transferencia = Transferencia(
+            id = "transferencia-1",
+            fecha = LocalDate.of(2026, 8, 5),
+            cuentaOrigen = cuentaBrubank(),
+            cuentaDestino = destino,
+            monto = Dinero.ars("25.00")
+        )
+        val pata = TransferIngreso(
+            id = "pata-monto-invalido",
+            transferencia = transferencia,
+            cuentaId = destino.id,
+            fecha = transferencia.fecha,
+            monto = Dinero.ars("30.00")
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            destino.registrar(pata)
+        }
+    }
+
+    @Test
+    fun no_registra_una_pata_con_una_fecha_distinta_a_la_de_la_transferencia() {
+        val destino = cuentaEfectivo()
+        val transferencia = Transferencia(
+            id = "transferencia-1",
+            fecha = LocalDate.of(2026, 8, 5),
+            cuentaOrigen = cuentaBrubank(),
+            cuentaDestino = destino,
+            monto = Dinero.ars("25.00")
+        )
+        val pata = TransferIngreso(
+            id = "pata-fecha-invalida",
+            transferencia = transferencia,
+            cuentaId = destino.id,
+            fecha = LocalDate.of(2026, 8, 6),
+            monto = transferencia.monto
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            destino.registrar(pata)
         }
     }
 

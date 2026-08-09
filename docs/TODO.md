@@ -49,24 +49,24 @@ fun la_salida_conoce_la_entrada_asociada_y_viceversa() {
 
 ---
 
-## 2. Guarda `OPERATIVA` inconsistente en las patas de transferencia
+## 2. Guarda `OPERATIVA` y rol de cuenta en las patas de transferencia
 
 `Ingreso` y `Egreso` sobrescriben `validarRegistroEn` para rechazar cuentas de
-inversión, pero `TransferIngreso` / `TransferEgreso` **no** lo hacen: heredan la
-versión base de `Transaccion` que solo valida `cuentaId` y moneda.
+inversión. Las patas de transferencia también deben verificar que la cuenta sea
+operativa y que corresponda al rol de la pata.
 
-El hueco queda tapado hoy por `Transferencia` (permite ambas cuentas operativas
-solo), pero la API pública `Cuenta.registrar(pataDeTransferencia)` registra una
-pata en una cuenta de inversión sin error.
+La validación del constructor de `Transferencia` no alcanza, porque la API
+pública `Cuenta.registrar(pataDeTransferencia)` también permite registrar patas
+creadas manualmente.
 
 > Nota: cuando se implementen aportes y rescates (que sí tocan cuentas de
 > inversión), la corrección no debería ser "agregar `OPERATIVA` a las patas"
 > a secas, sino modelar esas operaciones aparte para que la guarda quede en
 > cada tipo de operación según corresponda.
 
-### Estado: PENDIENTE
+### Estado: RESUELTO
 
-Test que hoy falla (semilla TDD):
+Los tests que guiaron la corrección verifican que:
 
 ```kotlin
 @Test
@@ -94,67 +94,65 @@ fun rechaza_una_pata_de_transferencia_en_una_cuenta_de_inversion() {
 }
 ```
 
-Hoy `inversion.registrar(pata)` no lanza ninguna excepción, por lo que el
-`assertFailsWith` falla (la pata se registra sola en la cuenta de inversión).
+También se verifica que una pata no pueda registrarse en una cuenta operativa
+distinta de la cuenta origen o destino correspondiente.
+
+La implementación valida el tipo de cuenta y la correspondencia entre el rol de
+la pata y la cuenta de la transferencia. Esto no bloquea futuros aportes y
+rescates, que deberán tener clases de operación diferentes con sus propias
+reglas.
 
 ---
 
-## 3. Ids de patas derivados por concatenación
+## 3. Unicidad local de ids de transacciones
 
-Las patas se identifican con `"$id:salida"` y `"$id:entrada"`. Eso expone dos
-problemas dentro del alcance actual:
+Las patas se identifican con `"$id:salida"` y `"$id:entrada"`. La regla del
+dominio es que dentro de una misma cuenta no puede existir más de una
+transacción con el mismo id, sin importar el tipo concreto:
 
-- **Colisión de ids con transacciones ingresadas por el usuario**: si el usuario
-  crea un `Ingreso` con id `"t1:entrada"`, coincide con el id derivado de la
-  pata de una transferencia con id `"t1".
-- **`equals` tipo a ciego**: `Transaccion.equals` compara solo `id` ignorando el
-  tipo, así que un `Ingreso` y un `TransferEgreso` con el mismo id se consideran
-  el mismo objeto.
+- Un `Ingreso` y otro `Ingreso` no pueden repetir id.
+- Un `Ingreso` y un `Egreso` tampoco pueden repetir id.
+- Una transacción manual no puede usar el id de una pata ya registrada.
 
-### Estado: PENDIENTE
+La unicidad es local a cada cuenta. La misma cadena podría existir en cuentas
+distintas, aunque la capa de aplicación podrá imponer una política más amplia
+si más adelante fuera necesario.
 
-Test que hoy falla:
+### Estado: RESUELTO
+
+`Cuenta.registrar` rechaza cualquier transacción cuyo id ya exista en esa cuenta,
+sin depender de la clase concreta ni de `equals`.
+
+Tests que cubren el comportamiento:
 
 ```kotlin
 @Test
-fun la_entrada_de_una_transferencia_no_es_igual_a_un_ingreso_con_el_mismo_id() {
-    val transferencia = Transferencia(
-        id = "transferencia-1",
-        fecha = LocalDate.of(2026, 8, 5),
-        cuentaOrigen = cuentaBrubank(),
-        cuentaDestino = cuentaEfectivo(),
-        monto = Dinero.ars("25.00")
-    )
-    val ingreso = Ingreso(
-        id = "transferencia-1:entrada",
-        cuentaId = "brubank",
-        fecha = LocalDate.of(2026, 8, 5),
-        monto = Dinero.ars("25.00")
-    )
-    assertNotEquals(transferencia.transferIngreso, ingreso)
+fun no_puede_registrar_dos_transacciones_de_distinto_tipo_con_el_mismo_id() {
+    cuenta.registrar(ingreso)
+    assertFailsWith<IllegalArgumentException> {
+        cuenta.registrar(egreso)
+    }
 }
 ```
 
-Hoy ambos tienen id `"transferencia-1:entrada"` y `equals` por id los considera
-iguales, por lo que el `assertNotEquals` falla.
+También se cubre la colisión entre una transacción manual y el id de una pata.
 
-Idea a evaluar (no urgente): derive ids por solo el id de la transferencia, o que
-`equals` de `Transaccion` incluya el tipo además del id.
+Se mantiene `Transaccion.equals` por id: bajo esta regla, dos transacciones con
+el mismo id representan la misma identidad lógica. La protección se aplica al
+registrar dentro de la cuenta.
 
 ---
 
 ## 4. Una cuenta permite registrar dos veces la misma transacción
 
-`Cuenta.registrar` no rechaza registrar dos veces la misma transacción ni otra
-con el mismo `id`. Registrar dos veces un mismo `Ingreso` duplica el efecto en
-el saldo.
+Registrar dos veces un mismo `Ingreso` duplicaba el efecto en el saldo.
 
 Nota: `solucion.st` también lo permite (`register:` agrega sin validar), así que
 es un comportamiento heredado del ejemplo. Se deja anotado como decisión.
 
-### Estado: PENDIENTE (baja prioridad)
+### Estado: RESUELTO
 
-Test que hoy falla:
+Test que cubre el comportamiento:
 
 ```kotlin
 @Test
@@ -173,7 +171,42 @@ fun no_se_puede_registrar_dos_veces_la_misma_transaccion() {
 }
 ```
 
-Hoy el segundo `registrar` no lanza una excepción y el saldo queda duplicado.
+El segundo `registrar` ahora lanza `IllegalArgumentException` y no modifica la
+lista ni el saldo de la cuenta.
+
+---
+
+## 5. Construcción manual de patas inconsistentes
+
+Las patas de transferencia son construidas automáticamente por `Transferencia`,
+pero sus constructores siguen siendo accesibles. Una pata creada manualmente no
+debe poder declarar otra cuenta, monto o fecha que los de su transferencia padre.
+
+### Estado: RESUELTO
+
+Al registrar una pata se valida:
+
+- que la cuenta sea operativa;
+- que sea la cuenta origen o destino correcta según el rol;
+- que el monto coincida con el de la transferencia;
+- que la fecha coincida con la de la transferencia.
+
+Los tests cubren patas con cuenta incorrecta, cuenta de inversión, monto
+incorrecto y fecha incorrecta.
+
+---
+
+## 6. Registro parcialmente exitoso de una transferencia
+
+Una transferencia registra dos patas en dos cuentas distintas. Si la segunda
+pata era rechazada, la primera podía quedar registrada, dejando las cuentas en
+un estado que no representaba ninguna transferencia válida.
+
+### Estado: RESUELTO
+
+La transferencia valida ambas patas antes de mutar cualquiera de las cuentas.
+El test correspondiente verifica que, si el id de la pata de entrada ya existe,
+la cuenta origen no conserve una salida huérfana.
 
 ---
 

@@ -57,6 +57,47 @@ class CuentaTest {
     }
 
     @Test
+    fun no_puede_registrar_dos_veces_la_misma_transaccion() {
+        val cuenta = cuentaBrubank()
+        val ingreso = Ingreso(
+            id = "transaccion-1",
+            cuentaId = "brubank",
+            fecha = LocalDate.of(2026, 8, 1),
+            monto = Dinero.ars("100.00")
+        )
+
+        cuenta.registrar(ingreso)
+
+        assertFailsWith<IllegalArgumentException> {
+            cuenta.registrar(ingreso)
+        }
+    }
+
+    @Test
+    fun no_puede_registrar_dos_transacciones_de_distinto_tipo_con_el_mismo_id() {
+        val cuenta = cuentaBrubank()
+        val ingreso = Ingreso(
+            id = "transaccion-1",
+            cuentaId = "brubank",
+            fecha = LocalDate.of(2026, 8, 1),
+            monto = Dinero.ars("100.00")
+        )
+        val egreso = Egreso(
+            id = "transaccion-1",
+            cuentaId = "brubank",
+            fecha = LocalDate.of(2026, 8, 2),
+            monto = Dinero.ars("25.00"),
+            categoria = null
+        )
+
+        cuenta.registrar(ingreso)
+
+        assertFailsWith<IllegalArgumentException> {
+            cuenta.registrar(egreso)
+        }
+    }
+
+    @Test
     fun no_puede_registrar_una_transaccion_de_otra_cuenta() {
         val cuenta = cuentaBrubank()
         val ingreso = Ingreso(

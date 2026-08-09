@@ -8,7 +8,20 @@ abstract class TransferTransaction(
     override val cuentaId: String,
     override val monto: Dinero,
     val transferencia: Transferencia
-) : Transaccion(id, fecha, monto)
+) : Transaccion(id, fecha, monto) {
+    override fun validarRegistroEn(cuenta: Cuenta) {
+        super.validarRegistroEn(cuenta)
+        require(cuenta.tipo == TipoCuenta.OPERATIVA) {
+            "Una pata de transferencia normal requiere una cuenta operativa"
+        }
+        require(fecha == transferencia.fecha) {
+            "La pata debe tener la fecha de la transferencia"
+        }
+        require(monto == transferencia.monto) {
+            "La pata debe tener el monto de la transferencia"
+        }
+    }
+}
 
 class TransferIngreso(
     id: String,
@@ -18,6 +31,13 @@ class TransferIngreso(
     monto: Dinero
 ) : TransferTransaction(id, fecha, cuentaId, monto, transferencia) {
     val associatedWithdraw: TransferEgreso get() = transferencia.transferEgreso
+
+    override fun validarRegistroEn(cuenta: Cuenta) {
+        super.validarRegistroEn(cuenta)
+        require(cuenta.id == transferencia.cuentaDestino.id) {
+            "La entrada debe registrarse en la cuenta destino de la transferencia"
+        }
+    }
 
     override fun afectarSaldo(saldo: Dinero): Dinero = saldo + monto
 }
@@ -30,6 +50,13 @@ class TransferEgreso(
     monto: Dinero
 ) : TransferTransaction(id, fecha, cuentaId, monto, transferencia) {
     val associatedDeposit: TransferIngreso get() = transferencia.transferIngreso
+
+    override fun validarRegistroEn(cuenta: Cuenta) {
+        super.validarRegistroEn(cuenta)
+        require(cuenta.id == transferencia.cuentaOrigen.id) {
+            "La salida debe registrarse en la cuenta origen de la transferencia"
+        }
+    }
 
     override fun afectarSaldo(saldo: Dinero): Dinero = saldo - monto
 }

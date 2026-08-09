@@ -20,8 +20,15 @@ class Cuenta(
     private val transacciones = mutableListOf<Transaccion>()
 
     fun registrar(transaccion: Transaccion) {
-        transaccion.validarRegistroEn(this)
+        validarPuedeRegistrar(transaccion)
         transacciones.add(transaccion)
+    }
+
+    internal fun validarPuedeRegistrar(transaccion: Transaccion) {
+        transaccion.validarRegistroEn(this)
+        require(transacciones.none { it.id == transaccion.id }) {
+            "La cuenta ya tiene una transaccion con ese id"
+        }
     }
 
     fun transacciones(): List<Transaccion> = transacciones.toList()
