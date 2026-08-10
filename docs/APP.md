@@ -24,6 +24,7 @@ Desde la interfaz se pueden crear:
 - presupuestos;
 - ingresos;
 - egresos categorizados o sin categoría;
+- egresos con descripción opcional;
 - transferencias normales;
 - aportes y rescates;
 - ajustes de valuación.

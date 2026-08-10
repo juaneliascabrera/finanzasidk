@@ -7,8 +7,11 @@ class Egreso(
     fecha: LocalDate,
     override val monto: Dinero,
     id: String,
-    val categoria: Categoria?
+    val categoria: Categoria?,
+    descripcion: String? = null
 ) : Transaccion(id, fecha, monto) {
+    val descripcion: String? = descripcion?.trim()?.takeIf { it.isNotEmpty() }
+
     init {
         require(id.isNotBlank()) { "El id del egreso no puede estar vacio" }
         require(monto.importe >= Dinero.cero(monto.moneda).importe) {
@@ -31,6 +34,6 @@ class Egreso(
     }
 
     override fun toString(): String {
-        return "Egreso(id=$id, cuentaId=$cuentaId, fecha=$fecha, monto=$monto, categoria=$categoria)"
+        return "Egreso(id=$id, cuentaId=$cuentaId, fecha=$fecha, monto=$monto, categoria=$categoria, descripcion=$descripcion)"
     }
 }

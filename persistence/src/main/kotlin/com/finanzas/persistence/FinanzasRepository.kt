@@ -242,6 +242,7 @@ private fun Ingreso.aEntity(): OperacionEntity {
         monto = monto.importe.toPlainString(),
         moneda = monto.moneda.name,
         categoriaId = null,
+        descripcion = null,
         valorAnterior = null,
         valorNuevo = null
     )
@@ -258,6 +259,7 @@ private fun Egreso.aEntity(): OperacionEntity {
         monto = monto.importe.toPlainString(),
         moneda = monto.moneda.name,
         categoriaId = categoria?.id,
+        descripcion = descripcion,
         valorAnterior = null,
         valorNuevo = null
     )
@@ -274,6 +276,7 @@ private fun AjusteValuacion.aEntity(): OperacionEntity {
         monto = monto.importe.toPlainString(),
         moneda = monto.moneda.name,
         categoriaId = null,
+        descripcion = null,
         valorAnterior = valorAnterior.importe.toPlainString(),
         valorNuevo = valorNuevo.importe.toPlainString()
     )
@@ -295,6 +298,7 @@ private fun Transferencia.aEntity(): OperacionEntity {
         monto = monto.importe.toPlainString(),
         moneda = monto.moneda.name,
         categoriaId = null,
+        descripcion = null,
         valorAnterior = null,
         valorNuevo = null
     )
@@ -340,7 +344,8 @@ private fun OperacionEntity.aEgreso(categoria: Categoria?): Egreso {
         cuentaId = cuentaId ?: error("El egreso no tiene cuenta"),
         fecha = LocalDate.parse(fecha),
         monto = aDinero(),
-        categoria = categoria
+        categoria = categoria,
+        descripcion = descripcion
     )
 }
 

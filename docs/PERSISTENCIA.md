@@ -114,7 +114,7 @@ bash lastcommand.txt
 
 ## Alcance pendiente
 
-- No hay migraciones todavía: el esquema actual es versión 1.
+- El esquema actual es versión 2 e incluye migración automática para la descripción opcional de egresos.
 - No hay archivado: el dominio todavía no modela el estado archivado.
 - La unicidad de ids de transacciones sigue siendo local a cada cuenta.
 - La UI Android existe en `app`, pero todavía requiere validación en emulador.

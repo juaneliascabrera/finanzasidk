@@ -16,6 +16,7 @@ El proyecto contiene y prueba:
 - Presupuestos mensuales por categoría.
 - Cuentas operativas y de inversión.
 - Ingresos y egresos.
+- Egresos con descripción opcional.
 - Transferencias normales entre cuentas operativas.
 - Aportes desde cuentas operativas hacia cuentas de inversión.
 - Rescates desde cuentas de inversión hacia cuentas operativas.

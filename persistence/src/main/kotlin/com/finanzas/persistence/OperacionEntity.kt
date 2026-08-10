@@ -49,6 +49,7 @@ data class OperacionEntity(
     val monto: String?,
     val moneda: String?,
     val categoriaId: String?,
+    val descripcion: String?,
     val valorAnterior: String?,
     val valorNuevo: String?
 )

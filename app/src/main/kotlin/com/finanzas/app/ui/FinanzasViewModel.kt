@@ -114,7 +114,7 @@ class FinanzasViewModel(
         }
     }
 
-    fun registrarEgreso(cuenta: Cuenta, categoria: Categoria?, importe: String, fecha: LocalDate, terminado: (Boolean) -> Unit) {
+    fun registrarEgreso(cuenta: Cuenta, categoria: Categoria?, importe: String, fecha: LocalDate, descripcion: String?, terminado: (Boolean) -> Unit) {
         ejecutar(terminado) {
             repository.registrarEgreso(
                 Egreso(
@@ -122,7 +122,8 @@ class FinanzasViewModel(
                     cuentaId = cuenta.id,
                     fecha = fecha,
                     monto = Dinero.de(importe.normalizarImporte(), cuenta.moneda),
-                    categoria = categoria
+                    categoria = categoria,
+                    descripcion = descripcion
                 )
             )
         }

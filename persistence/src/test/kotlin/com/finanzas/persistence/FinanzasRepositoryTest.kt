@@ -231,7 +231,8 @@ class FinanzasRepositoryTest {
                     cuentaId = cuenta.id,
                     fecha = LocalDate.of(2026, 8, 2),
                     monto = Dinero.ars("20.00"),
-                    categoria = categoria
+                    categoria = categoria,
+                    descripcion = "Café con amigos"
                 )
             )
 
@@ -240,6 +241,7 @@ class FinanzasRepositoryTest {
             assertNotNull(recuperada)
             assertEquals(Dinero.ars("130.00"), recuperada.saldo())
             assertEquals(2, recuperada.transacciones().size)
+            assertEquals("Café con amigos", (recuperada.transacciones()[1] as Egreso).descripcion)
         }
     }
 

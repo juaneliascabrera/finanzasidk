@@ -451,6 +451,7 @@ private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewMode
     var accountId by rememberSaveable { mutableStateOf(state.cuentas.firstOrNull()?.id.orEmpty()) }
     var categoryId by rememberSaveable { mutableStateOf(state.categorias.firstOrNull()?.id.orEmpty()) }
     var importe by rememberSaveable { mutableStateOf("") }
+    var descripcion by rememberSaveable { mutableStateOf("") }
     var fecha by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val cuenta = state.cuentas.firstOrNull { it.id == accountId }
@@ -462,6 +463,7 @@ private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewMode
             }
             DropdownField("Cuenta", state.cuentas, accountId, { it.id }, { it.nombre }) { accountId = it }
             if (!ingreso) DropdownField("Categoría", state.categorias, categoryId, { it.id }, { it.nombre }, allowEmpty = true) { categoryId = it }
+            if (!ingreso) OutlinedTextField(descripcion, { descripcion = it }, label = { Text("Descripción (opcional)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(importe, { importe = it }, label = { Text("Importe") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
@@ -485,7 +487,7 @@ private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewMode
                     error = null
                     val done: (Boolean) -> Unit = { if (it) onDismiss() }
                     if (ingreso) viewModel.registrarIngreso(cuenta, importe, date, done)
-                    else viewModel.registrarEgreso(cuenta, state.categorias.firstOrNull { it.id == categoryId }, importe, date, done)
+                    else viewModel.registrarEgreso(cuenta, state.categorias.firstOrNull { it.id == categoryId }, importe, date, descripcion, done)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Guardar") }
