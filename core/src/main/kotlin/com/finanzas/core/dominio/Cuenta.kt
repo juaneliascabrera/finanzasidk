@@ -11,6 +11,7 @@ class Cuenta(
 ) {
     init {
         require(id.isNotBlank()) { "El id de la cuenta no puede estar vacio" }
+        require(nombre.isNotBlank()) { "El nombre de la cuenta no puede estar vacio" }
         require(saldoInicial.moneda == moneda) {
             "El saldo inicial debe usar la moneda de la cuenta"
         }

@@ -69,4 +69,11 @@ class IdentidadTest {
             Categoria(id = "", nombre = "Comida")
         }
     }
+
+    @Test
+    fun rechaza_categorias_sin_nombre() {
+        assertFailsWith<IllegalArgumentException> {
+            Categoria(id = "comida", nombre = "   ")
+        }
+    }
 }

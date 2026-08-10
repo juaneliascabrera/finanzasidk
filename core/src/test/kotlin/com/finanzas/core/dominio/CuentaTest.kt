@@ -139,6 +139,19 @@ class CuentaTest {
     }
 
     @Test
+    fun rechaza_cuentas_sin_nombre() {
+        assertFailsWith<IllegalArgumentException> {
+            Cuenta(
+                id = "brubank",
+                nombre = "   ",
+                moneda = Moneda.ARS,
+                tipo = TipoCuenta.OPERATIVA,
+                saldoInicial = Dinero.ars("100.00")
+            )
+        }
+    }
+
+    @Test
     fun rechaza_transaccion_de_otra_moneda() {
         val cuenta = cuentaBrubank()
         val ingreso = Ingreso(

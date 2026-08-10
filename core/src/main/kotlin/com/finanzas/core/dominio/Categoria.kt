@@ -6,6 +6,7 @@ class Categoria(
 ) {
     init {
         require(id.isNotBlank()) { "El id de la categoria no puede estar vacio" }
+        require(nombre.isNotBlank()) { "El nombre de la categoria no puede estar vacio" }
     }
 
     override fun equals(otra: Any?): Boolean {

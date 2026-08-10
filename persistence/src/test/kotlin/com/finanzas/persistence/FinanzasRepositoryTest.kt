@@ -122,6 +122,46 @@ class FinanzasRepositoryTest {
     }
 
     @Test
+    fun no_permite_cambiar_la_base_financiera_de_una_cuenta_con_operaciones() = runTest {
+        conRepositorio {
+            val cuenta = cuentaBrubank()
+            guardarCuenta(cuenta)
+            registrarIngreso(
+                Ingreso(
+                    id = "ingreso-1",
+                    cuentaId = cuenta.id,
+                    fecha = LocalDate.of(2026, 8, 1),
+                    monto = Dinero.ars("10.00")
+                )
+            )
+
+            assertFailsWith<IllegalArgumentException> {
+                actualizarCuenta(
+                    Cuenta(
+                        id = cuenta.id,
+                        nombre = "Brubank",
+                        moneda = Moneda.USD,
+                        tipo = TipoCuenta.OPERATIVA,
+                        saldoInicial = Dinero.usd("100.00")
+                    )
+                )
+            }
+
+            assertFailsWith<IllegalArgumentException> {
+                actualizarCuenta(
+                    Cuenta(
+                        id = cuenta.id,
+                        nombre = "Brubank",
+                        moneda = Moneda.ARS,
+                        tipo = TipoCuenta.OPERATIVA,
+                        saldoInicial = Dinero.ars("101.00")
+                    )
+                )
+            }
+        }
+    }
+
+    @Test
     fun permite_eliminar_cuentas_y_categorias_sin_referencias() = runTest {
         conRepositorio {
             guardarCuenta(cuentaBrubank())

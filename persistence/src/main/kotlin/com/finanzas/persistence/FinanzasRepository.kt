@@ -22,8 +22,18 @@ class FinanzasRepository(private val database: FinanzasDatabase) {
     }
 
     suspend fun actualizarCuenta(cuenta: Cuenta) {
-        require(dao.obtenerCuenta(cuenta.id) != null) {
-            "La cuenta no existe"
+        val actual = dao.obtenerCuenta(cuenta.id)
+            ?: error("La cuenta no existe")
+        if (dao.contarOperacionesDeCuenta(cuenta.id) > 0) {
+            require(cuenta.moneda.name == actual.moneda) {
+                "No se puede cambiar la moneda de una cuenta con operaciones"
+            }
+            require(cuenta.tipo.name == actual.tipo) {
+                "No se puede cambiar el tipo de una cuenta con operaciones"
+            }
+            require(cuenta.saldoInicial.importe.toPlainString() == actual.saldoInicial) {
+                "No se puede cambiar el saldo inicial de una cuenta con operaciones"
+            }
         }
         dao.actualizarCuenta(cuenta.aEntity())
     }
