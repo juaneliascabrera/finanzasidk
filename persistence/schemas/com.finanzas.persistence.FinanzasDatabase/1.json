@@ -1,0 +1,229 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "0f9d6df85434144b45fb799688b30cef",
+    "entities": [
+      {
+        "tableName": "cuentas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `nombre` TEXT NOT NULL, `moneda` TEXT NOT NULL, `tipo` TEXT NOT NULL, `saldoInicial` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "moneda",
+            "columnName": "moneda",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saldoInicial",
+            "columnName": "saldoInicial",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "categorias",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `nombre` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "presupuestos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `categoriaId` TEXT NOT NULL, `mes` TEXT NOT NULL, `limite` TEXT NOT NULL, `moneda` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoriaId",
+            "columnName": "categoriaId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mes",
+            "columnName": "mes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "limite",
+            "columnName": "limite",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "moneda",
+            "columnName": "moneda",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_presupuestos_categoriaId",
+            "unique": false,
+            "columnNames": [
+              "categoriaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_presupuestos_categoriaId` ON `${TABLE_NAME}` (`categoriaId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "operaciones",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ordenRegistro` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT NOT NULL, `tipo` TEXT NOT NULL, `fecha` TEXT NOT NULL, `cuentaId` TEXT, `cuentaOrigenId` TEXT, `cuentaDestinoId` TEXT, `monto` TEXT, `moneda` TEXT, `categoriaId` TEXT, `valorAnterior` TEXT, `valorNuevo` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "ordenRegistro",
+            "columnName": "ordenRegistro",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cuentaId",
+            "columnName": "cuentaId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cuentaOrigenId",
+            "columnName": "cuentaOrigenId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cuentaDestinoId",
+            "columnName": "cuentaDestinoId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "monto",
+            "columnName": "monto",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "moneda",
+            "columnName": "moneda",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "categoriaId",
+            "columnName": "categoriaId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "valorAnterior",
+            "columnName": "valorAnterior",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "valorNuevo",
+            "columnName": "valorNuevo",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "ordenRegistro"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_operaciones_ordenRegistro",
+            "unique": false,
+            "columnNames": [
+              "ordenRegistro"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_operaciones_ordenRegistro` ON `${TABLE_NAME}` (`ordenRegistro`)"
+          },
+          {
+            "name": "index_operaciones_cuentaId_id",
+            "unique": false,
+            "columnNames": [
+              "cuentaId",
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_operaciones_cuentaId_id` ON `${TABLE_NAME}` (`cuentaId`, `id`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0f9d6df85434144b45fb799688b30cef')"
+    ]
+  }
+}

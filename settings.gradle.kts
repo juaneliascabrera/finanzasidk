@@ -8,3 +8,4 @@
 rootProject.name = "finanzas"
 
 include("core")
+include("persistence")

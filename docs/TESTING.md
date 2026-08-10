@@ -48,7 +48,9 @@ PresupuestoTest > calcula_el_restante_de_un_presupuesto_con_un_egreso_del_mismo_
 
 `BUILD SUCCESSFUL` indica que la tarea completa terminó sin fallos. La línea `PASSED` permite verificar además qué caso individual fue ejecutado y aprobado.
 
-Los tests actuales cubren presupuestos, identidad de entidades, cuentas, ingresos, egresos y transferencias normales. Cada nueva regla de dominio debe agregarse primero como test antes de implementar código productivo.
+Los tests actuales cubren presupuestos, identidad de entidades, cuentas, ingresos, egresos, transferencias, aportes, rescates, ajustes de valuación y persistencia con Room en memoria. Cada nueva regla de dominio debe agregarse primero como test antes de implementar código productivo.
+
+Los tests de persistencia se ejecutan en la JVM con SQLite bundled, sin Android ni dispositivo. Verifican tanto el mapeo de datos como la reconstrucción del dominio y el orden de registro de las operaciones.
 
 ## 1. Tests unitarios (obligatorios desde el inicio)
 

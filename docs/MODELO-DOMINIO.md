@@ -329,10 +329,11 @@ Actualmente están implementados y testeados:
 - Rescates de inversión entre cuentas de inversión y cuentas operativas.
 - Ajustes de valuación sobre cuentas de inversión.
 - Unicidad local de ids de transacciones dentro de cada cuenta.
+- Persistencia local del dominio en el módulo `persistence`, separada de `core`.
 
 Todavía no están implementados:
 
-- Persistencia.
+- Módulo Android `app` e interfaz visual.
 
 ## Primer comportamiento implementado con TDD
 

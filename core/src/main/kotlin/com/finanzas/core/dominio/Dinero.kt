@@ -44,6 +44,8 @@ class Dinero private constructor(
 
         fun cero(moneda: Moneda): Dinero = crear(BigDecimal.ZERO, moneda)
 
+        fun de(valor: String, moneda: Moneda): Dinero = crear(BigDecimal(valor), moneda)
+
         private fun crear(valor: BigDecimal, moneda: Moneda): Dinero {
             require(valor.scale() <= 2) {
                 "El importe no puede tener mas de dos decimales"
