@@ -150,7 +150,7 @@ no afecta presupuestos.
 Con un entorno local de Java y Gradle:
 
 ```bash
-./gradlew :core:test
+./gradlew :core:test :persistence:test
 ```
 
 Desde Docker, el comando recomendado para ejecutar los tests JVM es:
