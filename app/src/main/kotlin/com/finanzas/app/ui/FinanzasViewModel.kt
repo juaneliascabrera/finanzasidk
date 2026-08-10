@@ -59,6 +59,7 @@ class FinanzasViewModel(
     fun crearCuenta(nombre: String, moneda: Moneda, tipo: TipoCuenta, saldoInicial: String, terminado: (Boolean) -> Unit) {
         viewModelScope.launch {
             runCatching {
+                require(nombre.isNotBlank()) { "El nombre de la cuenta no puede estar vacio" }
                 val saldo = Dinero.de(saldoInicial.normalizarImporte(), moneda)
                 repository.guardarCuenta(
                     Cuenta(
@@ -82,6 +83,7 @@ class FinanzasViewModel(
     fun crearCategoria(nombre: String, terminado: (Boolean) -> Unit) {
         viewModelScope.launch {
             runCatching {
+                require(nombre.isNotBlank()) { "El nombre de la categoria no puede estar vacio" }
                 repository.guardarCategoria(
                     Categoria(UUID.randomUUID().toString(), nombre.trim())
                 )
