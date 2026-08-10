@@ -87,6 +87,10 @@ import com.finanzas.core.dominio.TipoTransferencia
 import com.finanzas.core.dominio.Transaccion
 import java.time.LocalDate
 import java.time.YearMonth
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.NumberFormat
+import java.util.Locale
 
 private enum class AppTab(val title: String) {
     INICIO("Inicio"),
@@ -243,10 +247,10 @@ private fun InicioScreen(
             }
         }
         item {
-            BalanceCard("Disponible en ARS", formatMoney(cuentasArs.sumOf { it.saldo().importe.toDouble() }, Moneda.ARS))
+            BalanceCard("Disponible en ARS", formatMoney(saldoTotal(cuentasArs, Moneda.ARS)))
         }
         if (cuentasUsd.isNotEmpty()) {
-            item { BalanceCard("Disponible en USD", formatMoney(cuentasUsd.sumOf { it.saldo().importe.toDouble() }, Moneda.USD), accent = true) }
+            item { BalanceCard("Disponible en USD", formatMoney(saldoTotal(cuentasUsd, Moneda.USD)), accent = true) }
         }
         item {
             QuickActions(onGasto, onIngreso, onTransferencia, onCuenta, onCategoria)
@@ -310,7 +314,7 @@ private fun AccountCard(cuenta: Cuenta) {
                 Text(cuenta.nombre, fontWeight = FontWeight.SemiBold)
                 Text(if (cuenta.tipo == TipoCuenta.INVERSION) "Inversión" else "Operativa", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(formatMoney(cuenta.saldo().importe.toDouble(), cuenta.moneda), fontWeight = FontWeight.Bold)
+            Text(formatMoney(cuenta.saldo()), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -355,7 +359,7 @@ private fun MovementRow(cuenta: Cuenta, transaccion: Transaccion) {
                 Text(title, fontWeight = FontWeight.SemiBold)
                 Text("${cuenta.nombre} · ${transaccion.fecha}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text((if (isPositive) "+" else "-") + formatMoney(transaccion.monto.importe.toDouble().let { kotlin.math.abs(it) }, transaccion.monto.moneda), fontWeight = FontWeight.Bold)
+            Text((if (isPositive) "+" else "-") + formatMoney(dineroAbsoluto(transaccion.monto)), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -372,7 +376,7 @@ private fun InversionesScreen(state: FinanzasUiState, onTransferencia: () -> Uni
             Card(shape = RoundedCornerShape(22.dp)) {
                 Column(Modifier.padding(18.dp)) {
                     Text(cuenta.nombre, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(formatMoney(cuenta.saldo().importe.toDouble(), cuenta.moneda), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(formatMoney(cuenta.saldo()), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onTransferencia, modifier = Modifier.weight(1f)) { Text("Aportar / rescatar") }
@@ -405,7 +409,14 @@ private fun PresupuestosScreen(state: FinanzasUiState, onNuevoPresupuesto: () ->
 
 @Composable
 private fun BudgetCard(presupuesto: Presupuesto, restante: Dinero) {
-    val progress = (restante.importe.toDouble() / presupuesto.limite.importe.toDouble()).coerceIn(0.0, 1.0).toFloat()
+    val progress = if (presupuesto.limite.importe.signum() == 0) {
+        0f
+    } else {
+        restante.importe
+            .divide(presupuesto.limite.importe, 4, RoundingMode.HALF_UP)
+            .coerceIn(BigDecimal.ZERO, BigDecimal.ONE)
+            .toFloat()
+    }
     Card {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -413,12 +424,12 @@ private fun BudgetCard(presupuesto: Presupuesto, restante: Dinero) {
                     Text(presupuesto.categoria.nombre, fontWeight = FontWeight.SemiBold)
                     Text(presupuesto.mes.toString(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text(formatMoney(restante.importe.toDouble(), restante.moneda), fontWeight = FontWeight.Bold)
+                Text(formatMoney(restante), fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(12.dp))
             androidx.compose.material3.LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(5.dp))
-            Text("de ${formatMoney(presupuesto.limite.importe.toDouble(), presupuesto.limite.moneda)} disponibles", style = MaterialTheme.typography.labelSmall)
+            Text("de ${formatMoney(presupuesto.limite)} disponibles", style = MaterialTheme.typography.labelSmall)
         }
     }
 }
@@ -602,9 +613,20 @@ private fun FilterChipButton(text: String, selected: Boolean, onClick: () -> Uni
     else OutlinedButton(onClick = onClick, modifier = Modifier.width(130.dp)) { Text(text) }
 }
 
-private fun formatMoney(value: Double, moneda: Moneda): String {
-    val sign = if (value < 0) "-" else ""
-    return "$sign${"%,.2f".format(kotlin.math.abs(value)).replace(',', 'X').replace('.', ',').replace('X', '.')} ${moneda.name}"
+private fun saldoTotal(cuentas: List<Cuenta>, moneda: Moneda): Dinero {
+    return cuentas.fold(Dinero.cero(moneda)) { total, cuenta -> total + cuenta.saldo() }
+}
+
+private fun dineroAbsoluto(dinero: Dinero): Dinero {
+    return Dinero.de(dinero.importe.abs().toPlainString(), dinero.moneda)
+}
+
+private fun formatMoney(value: Dinero): String {
+    val formatter = NumberFormat.getNumberInstance(Locale("es", "AR")).apply {
+        minimumFractionDigits = 2
+        maximumFractionDigits = 2
+    }
+    return "${formatter.format(value.importe)} ${value.moneda.name}"
 }
 
 private fun TipoTransferencia.label(): String = when (this) {
