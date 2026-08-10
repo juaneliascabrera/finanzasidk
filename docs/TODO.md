@@ -59,10 +59,9 @@ La validación del constructor de `Transferencia` no alcanza, porque la API
 pública `Cuenta.registrar(pataDeTransferencia)` también permite registrar patas
 creadas manualmente.
 
-> Nota: cuando se implementen aportes y rescates (que sí tocan cuentas de
-> inversión), la corrección no debería ser "agregar `OPERATIVA` a las patas"
-> a secas, sino modelar esas operaciones aparte para que la guarda quede en
-> cada tipo de operación según corresponda.
+> Las reglas de cuentas no se agregan como una condición global a las patas:
+> cada variante de `TipoTransferencia` define qué tipo de origen y destino
+> permite.
 
 ### Estado: RESUELTO
 
@@ -98,9 +97,8 @@ También se verifica que una pata no pueda registrarse en una cuenta operativa
 distinta de la cuenta origen o destino correspondiente.
 
 La implementación valida el tipo de cuenta y la correspondencia entre el rol de
-la pata y la cuenta de la transferencia. Esto no bloquea futuros aportes y
-rescates, que deberán tener clases de operación diferentes con sus propias
-reglas.
+la pata y la cuenta de la transferencia. Esto permite que transferencia normal,
+aporte y rescate compartan patas sin mezclar sus reglas.
 
 ---
 

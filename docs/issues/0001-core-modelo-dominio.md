@@ -51,8 +51,8 @@ Crear un módulo Gradle `core` con Kotlin puro (sin dependencias de Android) que
 - [x] Está implementada la jerarquía común `Transaccion`.
 - [x] Están implementados aportes y rescates de inversión.
 - [x] Están implementados los ajustes de valuación.
-- [ ] Existe documentación de uso del repositorio equivalente a un README.
-- [ ] El `README.md` del proyecto tiene instrucciones mínimas para ejecutar los tests.
+- [x] Existe documentación de uso del repositorio equivalente a un README.
+- [x] El `README.md` del proyecto tiene instrucciones mínimas para ejecutar los tests.
 
 ## Impacto en VISION.md
 

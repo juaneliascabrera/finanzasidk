@@ -84,7 +84,8 @@ Para testear lógica pura no hace falta. Se crean instancias directamente con lo
 
 **Herramientas:**
 - **Room in-memory database**: SQLite corre en memoria durante el test, sin tocar el almacenamiento real del dispositivo.
-- **JUnit 4** con una regla de Android para inicializar Room.
+- **SQLite Bundled**: permite ejecutar Room en la JVM sin Android.
+- **JUnit 5** y `kotlinx-coroutines-test`: ejecutan los DAOs `suspend` y el repositorio.
 
 **Ejemplo:**
 - Insertar un gasto y verificar que se pueda recuperar por mes.
