@@ -1,6 +1,6 @@
 # Comandos del proyecto
 
-## Ejecutar todos los tests
+## Ejecutar tests JVM
 
 Desde la raíz del repositorio:
 
@@ -13,12 +13,12 @@ docker run --rm \
   -v finanzas-gradle-home:/home/gradle/.gradle \
   -w /app \
   gradle:8.12.1-jdk21 \
-  ./gradlew test --no-daemon --console=plain
+  ./gradlew :core:test :persistence:test --no-daemon --console=plain
 ```
 
 Este comando:
 
-- Ejecuta los tests de todos los módulos del proyecto.
+- Ejecuta los tests JVM de `core` y `persistence`.
 - Ejecuta siempre los tests, aunque Gradle los considere `UP-TO-DATE`.
 - Muestra explícitamente los tests `PASSED`, `FAILED` y `SKIPPED`.
 - Usa Docker para evitar instalar Java o Gradle en el sistema host.
@@ -40,14 +40,26 @@ Las tareas de compilación pueden mostrar:
 :core:test UP-TO-DATE
 ```
 
-Eso significa que reutilizaron un resultado anterior porque no detectaron cambios. Es correcto y permite que el build sea rápido. La tarea `test` está configurada aparte para ejecutarse siempre, por lo que debería mostrar los casos `PASSED` en cada invocación.
+Eso significa que reutilizaron un resultado anterior porque no detectaron cambios. Es correcto y permite que el build sea rápido. Las tareas `test` están configuradas aparte para ejecutarse siempre, por lo que deberían mostrar los casos `PASSED` en cada invocación.
 
-## Comando local futuro
+## Validar Android
+
+Estos comandos requieren Android SDK configurado:
+
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:testDebugUnitTest
+./gradlew :app:connectedDebugAndroidTest
+```
+
+El último requiere un emulador o dispositivo conectado.
+
+## Comando local JVM
 
 Cuando exista un entorno con Java configurado, el equivalente será:
 
 ```bash
-./gradlew test
+./gradlew :core:test :persistence:test
 ```
 
 ---

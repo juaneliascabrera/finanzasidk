@@ -153,7 +153,7 @@ Con un entorno local de Java y Gradle:
 ./gradlew :core:test
 ```
 
-Desde Docker, el comando recomendado para ejecutar todos los tests es:
+Desde Docker, el comando recomendado para ejecutar los tests JVM es:
 
 ```bash
 docker volume create finanzas-gradle-home >/dev/null
@@ -164,7 +164,7 @@ docker run --rm \
   -v finanzas-gradle-home:/home/gradle/.gradle \
   -w /app \
   gradle:8.12.1-jdk21 \
-  ./gradlew test --no-daemon --console=plain
+  ./gradlew :core:test :persistence:test --no-daemon --console=plain
 ```
 
 La documentación ampliada de testing está en `docs/TESTING.md` y la versión
@@ -172,6 +172,13 @@ canónica del comando está en `docs/COMANDOS.md`.
 
 La arquitectura y el esquema de almacenamiento están documentados en
 `docs/PERSISTENCIA.md`.
+
+Para validar Android se necesita un entorno con Android SDK:
+
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:connectedDebugAndroidTest
+```
 
 ## Decisiones de diseño
 

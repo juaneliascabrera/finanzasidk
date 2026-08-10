@@ -16,7 +16,7 @@ Para ejecutar sus tests:
 ./gradlew :core:test
 ```
 
-Desde Docker, el comando recomendado para ejecutar todos los tests es:
+Desde Docker, el comando recomendado para ejecutar los tests JVM es:
 
 La versión canónica y reutilizable de este comando está en [`COMANDOS.md`](COMANDOS.md).
 
@@ -29,10 +29,10 @@ docker run --rm \
   -v finanzas-gradle-home:/home/gradle/.gradle \
   -w /app \
   gradle:8.12.1-jdk21 \
-  ./gradlew test --no-daemon --console=plain
+  ./gradlew :core:test :persistence:test --no-daemon --console=plain
 ```
 
-El volumen `finanzas-gradle-home` conserva la distribución de Gradle y las dependencias descargadas entre ejecuciones. `--no-daemon` evita iniciar un proceso persistente dentro del contenedor. `test` ejecuta los tests de todos los módulos que tengan esa tarea. La tarea `test` está configurada para ejecutarse siempre, mientras que las tareas de compilación siguen usando la caché incremental.
+El volumen `finanzas-gradle-home` conserva la distribución de Gradle y las dependencias descargadas entre ejecuciones. `--no-daemon` evita iniciar un proceso persistente dentro del contenedor. Las tareas `test` están configuradas para ejecutarse siempre, mientras que las tareas de compilación siguen usando la caché incremental.
 
 Para ejecutar la validación completa del módulo:
 
@@ -51,6 +51,13 @@ PresupuestoTest > calcula_el_restante_de_un_presupuesto_con_un_egreso_del_mismo_
 Los tests actuales cubren presupuestos, identidad de entidades, cuentas, ingresos, egresos, transferencias, aportes, rescates, ajustes de valuación y persistencia con Room en memoria. Cada nueva regla de dominio debe agregarse primero como test antes de implementar código productivo.
 
 Los tests de persistencia se ejecutan en la JVM con SQLite bundled, sin Android ni dispositivo. Verifican tanto el mapeo de datos como la reconstrucción del dominio y el orden de registro de las operaciones.
+
+El módulo `app` tiene un smoke test Compose en `src/androidTest`. Para ejecutarlo se necesita Android SDK y un emulador o dispositivo:
+
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:connectedDebugAndroidTest
+```
 
 ## 1. Tests unitarios (obligatorios desde el inicio)
 
