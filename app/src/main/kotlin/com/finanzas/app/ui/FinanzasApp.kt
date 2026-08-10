@@ -184,8 +184,8 @@ fun FinanzasApp() {
         DialogKind.MOVIMIENTO -> MovimientoDialog(state, viewModel, movimientoIngreso) { dialog = DialogKind.NONE }
         DialogKind.TRANSFERENCIA -> TransferenciaDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.AJUSTE -> AjusteDialog(state, viewModel) { dialog = DialogKind.NONE }
-        DialogKind.CUENTA -> CuentaDialog(viewModel) { dialog = DialogKind.NONE }
-        DialogKind.CATEGORIA -> CategoriaDialog(viewModel) { dialog = DialogKind.NONE }
+        DialogKind.CUENTA -> CuentaDialog(state, viewModel) { dialog = DialogKind.NONE }
+        DialogKind.CATEGORIA -> CategoriaDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.PRESUPUESTO -> PresupuestoDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.NONE -> Unit
     }
@@ -466,6 +466,7 @@ private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewMode
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             Button(
+                enabled = !state.guardando,
                 onClick = {
                     if (cuenta == null) {
                         error = "Elegí una cuenta"
@@ -513,7 +514,7 @@ private fun TransferenciaDialog(state: FinanzasUiState, viewModel: FinanzasViewM
             OutlinedTextField(importe, { importe = it }, label = { Text("Importe") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
-            Button(onClick = {
+            Button(enabled = !state.guardando, onClick = {
                 if (origen == null || destino == null) {
                     error = "No hay cuentas compatibles con este tipo de movimiento"
                     return@Button
@@ -557,7 +558,7 @@ private fun AjusteDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, o
             OutlinedTextField(nuevoValor, { nuevoValor = it }, label = { Text("Nuevo valor") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
-            Button(onClick = {
+            Button(enabled = !state.guardando, onClick = {
                 if (cuenta == null) {
                     error = "No hay cuentas de inversión"
                     return@Button
@@ -580,7 +581,7 @@ private fun AjusteDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, o
 }
 
 @Composable
-private fun CuentaDialog(viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+private fun CuentaDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
     var nombre by rememberSaveable { mutableStateOf("") }
     var monedaName by rememberSaveable { mutableStateOf(Moneda.ARS.name) }
     var tipoName by rememberSaveable { mutableStateOf(TipoCuenta.OPERATIVA.name) }
@@ -591,7 +592,7 @@ private fun CuentaDialog(viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
             DropdownField("Moneda", Moneda.entries.toList(), monedaName, { it.name }, { it.name }) { monedaName = it }
             DropdownField("Tipo", TipoCuenta.entries.toList(), tipoName, { it.name }, { if (it == TipoCuenta.INVERSION) "Inversión" else "Operativa" }) { tipoName = it }
             OutlinedTextField(saldo, { saldo = it }, label = { Text("Saldo inicial") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
-            Button(onClick = {
+            Button(enabled = !state.guardando, onClick = {
                 viewModel.crearCuenta(nombre, Moneda.valueOf(monedaName), TipoCuenta.valueOf(tipoName), saldo) { if (it) onDismiss() }
             }, modifier = Modifier.fillMaxWidth()) { Text("Crear cuenta") }
         }
@@ -599,12 +600,12 @@ private fun CuentaDialog(viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun CategoriaDialog(viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+private fun CategoriaDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
     var nombre by rememberSaveable { mutableStateOf("") }
     FormDialog("Nueva categoría", onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             OutlinedTextField(nombre, { nombre = it }, label = { Text("Nombre") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            Button(onClick = { viewModel.crearCategoria(nombre) { if (it) onDismiss() } }, modifier = Modifier.fillMaxWidth()) { Text("Crear categoría") }
+            Button(enabled = !state.guardando, onClick = { viewModel.crearCategoria(nombre) { if (it) onDismiss() } }, modifier = Modifier.fillMaxWidth()) { Text("Crear categoría") }
         }
     }
 }
@@ -625,7 +626,7 @@ private fun PresupuestoDialog(state: FinanzasUiState, viewModel: FinanzasViewMod
                 OutlinedTextField(mes, { mes = it }, label = { Text("Mes (AAAA-MM)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 DropdownField("Moneda", Moneda.entries.toList(), monedaName, { it.name }, { it.name }) { monedaName = it }
                 OutlinedTextField(limite, { limite = it }, label = { Text("Límite") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
-                Button(onClick = {
+                Button(enabled = !state.guardando, onClick = {
                     val month = runCatching { YearMonth.parse(mes) }.getOrNull() ?: return@Button
                     if (categoria == null) return@Button
                     viewModel.crearPresupuesto(categoria, month, limite, Moneda.valueOf(monedaName)) { if (it) onDismiss() }

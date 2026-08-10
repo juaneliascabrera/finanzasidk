@@ -26,6 +26,7 @@ data class FinanzasUiState(
     val categorias: List<Categoria> = emptyList(),
     val presupuestos: List<Presupuesto> = emptyList(),
     val cargando: Boolean = true,
+    val guardando: Boolean = false,
     val error: String? = null
 )
 
@@ -49,7 +50,7 @@ class FinanzasViewModel(
                     repository.obtenerPresupuestos()
                 )
             }.onSuccess { (cuentas, categorias, presupuestos) ->
-                _state.value = FinanzasUiState(cuentas, categorias, presupuestos, false)
+                _state.value = FinanzasUiState(cuentas, categorias, presupuestos, false, false)
             }.onFailure { error ->
                 _state.value = _state.value.copy(cargando = false, error = error.message ?: "No se pudo cargar la información")
             }
@@ -57,43 +58,27 @@ class FinanzasViewModel(
     }
 
     fun crearCuenta(nombre: String, moneda: Moneda, tipo: TipoCuenta, saldoInicial: String, terminado: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            runCatching {
-                require(nombre.isNotBlank()) { "El nombre de la cuenta no puede estar vacio" }
-                val saldo = Dinero.de(saldoInicial.normalizarImporte(), moneda)
-                repository.guardarCuenta(
-                    Cuenta(
-                        id = UUID.randomUUID().toString(),
-                        nombre = nombre.trim(),
-                        moneda = moneda,
-                        tipo = tipo,
-                        saldoInicial = saldo
-                    )
+        ejecutar(terminado) {
+            require(nombre.isNotBlank()) { "El nombre de la cuenta no puede estar vacio" }
+            val saldo = Dinero.de(saldoInicial.normalizarImporte(), moneda)
+            repository.guardarCuenta(
+                Cuenta(
+                    id = UUID.randomUUID().toString(),
+                    nombre = nombre.trim(),
+                    moneda = moneda,
+                    tipo = tipo,
+                    saldoInicial = saldo
                 )
-            }.onSuccess {
-                refrescar()
-                terminado(true)
-            }.onFailure { error ->
-                mostrarError(error)
-                terminado(false)
-            }
+            )
         }
     }
 
     fun crearCategoria(nombre: String, terminado: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            runCatching {
-                require(nombre.isNotBlank()) { "El nombre de la categoria no puede estar vacio" }
-                repository.guardarCategoria(
-                    Categoria(UUID.randomUUID().toString(), nombre.trim())
-                )
-            }.onSuccess {
-                refrescar()
-                terminado(true)
-            }.onFailure { error ->
-                mostrarError(error)
-                terminado(false)
-            }
+        ejecutar(terminado) {
+            require(nombre.isNotBlank()) { "El nombre de la categoria no puede estar vacio" }
+            repository.guardarCategoria(
+                Categoria(UUID.randomUUID().toString(), nombre.trim())
+            )
         }
     }
 
@@ -177,13 +162,16 @@ class FinanzasViewModel(
     }
 
     private fun ejecutar(terminado: (Boolean) -> Unit, accion: suspend () -> Unit) {
+        if (_state.value.guardando) return
         viewModelScope.launch {
+            _state.value = _state.value.copy(guardando = true, error = null)
             runCatching { accion() }
                 .onSuccess {
-                    refrescar()
                     terminado(true)
+                    refrescar()
                 }
                 .onFailure { error ->
+                    _state.value = _state.value.copy(guardando = false)
                     mostrarError(error)
                     terminado(false)
                 }
