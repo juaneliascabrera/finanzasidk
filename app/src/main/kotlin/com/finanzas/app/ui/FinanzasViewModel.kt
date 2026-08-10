@@ -95,6 +95,25 @@ class FinanzasViewModel(
         }
     }
 
+    fun crearPresupuesto(
+        categoria: Categoria,
+        mes: java.time.YearMonth,
+        limite: String,
+        moneda: Moneda,
+        terminado: (Boolean) -> Unit
+    ) {
+        ejecutar(terminado) {
+            repository.guardarPresupuesto(
+                Presupuesto(
+                    id = UUID.randomUUID().toString(),
+                    categoria = categoria,
+                    mes = mes,
+                    limite = Dinero.de(limite.normalizarImporte(), moneda)
+                )
+            )
+        }
+    }
+
     fun registrarIngreso(cuenta: Cuenta, importe: String, fecha: LocalDate, terminado: (Boolean) -> Unit) {
         ejecutar(terminado) {
             repository.registrarIngreso(

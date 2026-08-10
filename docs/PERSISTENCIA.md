@@ -117,4 +117,4 @@ bash lastcommand.txt
 - No hay migraciones todavía: el esquema actual es versión 1.
 - No hay archivado: el dominio todavía no modela el estado archivado.
 - La unicidad de ids de transacciones sigue siendo local a cada cuenta.
-- La UI Android todavía no existe.
+- La UI Android existe en `app`, pero todavía requiere validación en emulador.

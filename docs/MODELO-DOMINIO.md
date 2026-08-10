@@ -335,7 +335,7 @@ Actualmente están implementados y testeados:
 
 Todavía no están implementados:
 
-- Módulo Android `app` e interfaz visual.
+- Persistencia avanzada con migraciones de esquema.
 
 ## Primer comportamiento implementado con TDD
 

@@ -3,9 +3,9 @@
 Aplicación móvil de finanzas personales, offline-first y enfocada en registrar
 ingresos, egresos, presupuestos e inversiones con la menor fricción posible.
 
-El proyecto todavía está en la etapa previa a la UI. Actualmente existen los
-módulos `core` y `persistence`, escritos para la JVM y sin dependencias de una
-interfaz Android.
+El proyecto tiene el dominio, la persistencia local y una primera aplicación
+Android con Compose. La interfaz está enfocada en registrar operaciones rápido
+y consultar el estado financiero sin conexión.
 
 ## Estado actual
 
@@ -26,10 +26,19 @@ El proyecto contiene y prueba:
 
 El módulo `persistence` agrega persistencia local con Room y SQLite bundled, sin UI.
 
+El módulo `app` incluye una interfaz Compose inicial con:
+
+- resumen de saldos;
+- cuentas operativas y de inversión;
+- historial de movimientos;
+- presupuestos;
+- registro de ingresos y egresos;
+- transferencias, aportes y rescates;
+- ajustes de valuación;
+- creación de cuentas y categorías.
+
 Todavía no están implementados:
 
-- Módulo Android `app`.
-- Interfaz visual.
 - Sincronización con bancos, billeteras o brokers.
 
 ## Estructura
@@ -56,6 +65,10 @@ persistence/
   src/main/kotlin/com/finanzas/persistence/
   src/test/kotlin/com/finanzas/persistence/
   schemas/
+
+app/
+  src/main/kotlin/com/finanzas/app/
+  src/main/res/
 ```
 
 El modelo de dominio no depende de Android, Room ni una interfaz visual. Esto
@@ -175,7 +188,7 @@ La arquitectura y el esquema de almacenamiento están documentados en
 ## Próximos pasos
 
 1. Agregar migraciones para futuras versiones del esquema.
-2. Crear el módulo Android `app`.
-3. Construir la pantalla principal de registro rápido de egresos.
+2. Validar el build Android en un entorno con SDK y realizar smoke tests en emulador.
+3. Refinar accesibilidad, estados vacíos y feedback de errores.
 
 La documentación funcional completa está en `docs/MODELO-DOMINIO.md`.

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -84,6 +86,7 @@ import com.finanzas.core.dominio.TipoCuenta
 import com.finanzas.core.dominio.TipoTransferencia
 import com.finanzas.core.dominio.Transaccion
 import java.time.LocalDate
+import java.time.YearMonth
 
 private enum class AppTab(val title: String) {
     INICIO("Inicio"),
@@ -98,7 +101,8 @@ private enum class DialogKind {
     TRANSFERENCIA,
     AJUSTE,
     CUENTA,
-    CATEGORIA
+    CATEGORIA,
+    PRESUPUESTO
 }
 
 private val transferTypes = listOf(
@@ -114,6 +118,7 @@ fun FinanzasApp() {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var selectedTab by rememberSaveable { mutableStateOf(AppTab.INICIO.name) }
     var dialog by rememberSaveable { mutableStateOf(DialogKind.NONE.name) }
+    var movimientoIngreso by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.error) {
@@ -160,7 +165,8 @@ fun FinanzasApp() {
                 state.cuentas.isEmpty() -> EmptyAccountsScreen { dialog = DialogKind.CUENTA.name }
                 tab == AppTab.INICIO -> InicioScreen(
                     state = state,
-                    onMovimiento = { dialog = DialogKind.MOVIMIENTO.name },
+                    onGasto = { movimientoIngreso = false; dialog = DialogKind.MOVIMIENTO.name },
+                    onIngreso = { movimientoIngreso = true; dialog = DialogKind.MOVIMIENTO.name },
                     onTransferencia = { dialog = DialogKind.TRANSFERENCIA.name },
                     onCuenta = { dialog = DialogKind.CUENTA.name },
                     onCategoria = { dialog = DialogKind.CATEGORIA.name }
@@ -171,17 +177,18 @@ fun FinanzasApp() {
                     onTransferencia = { dialog = DialogKind.TRANSFERENCIA.name },
                     onAjuste = { dialog = DialogKind.AJUSTE.name }
                 )
-                else -> PresupuestosScreen(state)
+                else -> PresupuestosScreen(state) { dialog = DialogKind.PRESUPUESTO.name }
             }
         }
     }
 
     when (DialogKind.valueOf(dialog)) {
-        DialogKind.MOVIMIENTO -> MovimientoDialog(state, viewModel) { dialog = DialogKind.NONE }
+        DialogKind.MOVIMIENTO -> MovimientoDialog(state, viewModel, movimientoIngreso) { dialog = DialogKind.NONE }
         DialogKind.TRANSFERENCIA -> TransferenciaDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.AJUSTE -> AjusteDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.CUENTA -> CuentaDialog(viewModel) { dialog = DialogKind.NONE }
         DialogKind.CATEGORIA -> CategoriaDialog(viewModel) { dialog = DialogKind.NONE }
+        DialogKind.PRESUPUESTO -> PresupuestoDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.NONE -> Unit
     }
 }
@@ -213,7 +220,8 @@ private fun EmptyAccountsScreen(onCreate: () -> Unit) {
 @Composable
 private fun InicioScreen(
     state: FinanzasUiState,
-    onMovimiento: () -> Unit,
+    onGasto: () -> Unit,
+    onIngreso: () -> Unit,
     onTransferencia: () -> Unit,
     onCuenta: () -> Unit,
     onCategoria: () -> Unit
@@ -241,7 +249,7 @@ private fun InicioScreen(
             item { BalanceCard("Disponible en USD", formatMoney(cuentasUsd.sumOf { it.saldo().importe.toDouble() }, Moneda.USD), accent = true) }
         }
         item {
-            QuickActions(onMovimiento, onTransferencia, onCuenta, onCategoria)
+            QuickActions(onGasto, onIngreso, onTransferencia, onCuenta, onCategoria)
         }
         item {
             SectionTitle("Tus cuentas")
@@ -272,12 +280,13 @@ private fun BalanceCard(title: String, amount: String, accent: Boolean = false) 
 }
 
 @Composable
-private fun QuickActions(onMovimiento: () -> Unit, onTransferencia: () -> Unit, onCuenta: () -> Unit, onCategoria: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        QuickAction(Icons.Outlined.ArrowDownward, "Gasto", onMovimiento)
-        QuickAction(Icons.Outlined.ArrowUpward, "Ingreso", onMovimiento)
+private fun QuickActions(onGasto: () -> Unit, onIngreso: () -> Unit, onTransferencia: () -> Unit, onCuenta: () -> Unit, onCategoria: () -> Unit) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        QuickAction(Icons.Outlined.ArrowDownward, "Gasto", onGasto)
+        QuickAction(Icons.Outlined.ArrowUpward, "Ingreso", onIngreso)
         QuickAction(Icons.Outlined.SwapHoriz, "Mover", onTransferencia)
         QuickAction(Icons.Outlined.AccountBalance, "Cuenta", onCuenta)
+        QuickAction(Icons.Outlined.MoreHoriz, "Categoría", onCategoria)
     }
 }
 
@@ -377,12 +386,17 @@ private fun InversionesScreen(state: FinanzasUiState, onTransferencia: () -> Uni
 }
 
 @Composable
-private fun PresupuestosScreen(state: FinanzasUiState) {
+private fun PresupuestosScreen(state: FinanzasUiState, onNuevoPresupuesto: () -> Unit) {
     val egresos = state.cuentas.flatMap { it.transacciones() }.filterIsInstance<Egreso>()
     LazyColumn(Modifier.fillMaxSize().padding(horizontal = 20.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 22.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
-            Text("Presupuestos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("Cómo viene tu mes", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Presupuestos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    Text("Cómo viene tu mes", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                TextButton(onClick = onNuevoPresupuesto) { Text("Nuevo") }
+            }
         }
         items(state.presupuestos, key = { it.id }) { presupuesto -> BudgetCard(presupuesto, presupuesto.restante(egresos)) }
         if (state.presupuestos.isEmpty()) item { Text("Todavía no configuraste presupuestos.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -426,8 +440,8 @@ private fun FormDialog(title: String, onDismiss: () -> Unit, content: @Composabl
 }
 
 @Composable
-private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
-    var ingreso by rememberSaveable { mutableStateOf(false) }
+private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, initialIngreso: Boolean, onDismiss: () -> Unit) {
+    var ingreso by rememberSaveable(initialIngreso) { mutableStateOf(initialIngreso) }
     var accountId by rememberSaveable { mutableStateOf(state.cuentas.firstOrNull()?.id.orEmpty()) }
     var categoryId by rememberSaveable { mutableStateOf(state.categorias.firstOrNull()?.id.orEmpty()) }
     var importe by rememberSaveable { mutableStateOf("") }
@@ -537,6 +551,32 @@ private fun CategoriaDialog(viewModel: FinanzasViewModel, onDismiss: () -> Unit)
 }
 
 @Composable
+private fun PresupuestoDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+    var categoryId by rememberSaveable { mutableStateOf(state.categorias.firstOrNull()?.id.orEmpty()) }
+    var mes by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
+    var limite by rememberSaveable { mutableStateOf("") }
+    var monedaName by rememberSaveable { mutableStateOf(Moneda.ARS.name) }
+    val categoria = state.categorias.firstOrNull { it.id == categoryId }
+    FormDialog("Nuevo presupuesto", onDismiss) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (state.categorias.isEmpty()) {
+                Text("Primero necesitás crear una categoría.", color = MaterialTheme.colorScheme.error)
+            } else {
+                DropdownField("Categoría", state.categorias, categoryId, { it.id }, { it.nombre }) { categoryId = it }
+                OutlinedTextField(mes, { mes = it }, label = { Text("Mes (AAAA-MM)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                DropdownField("Moneda", Moneda.entries.toList(), monedaName, { it.name }, { it.name }) { monedaName = it }
+                OutlinedTextField(limite, { limite = it }, label = { Text("Límite") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
+                Button(onClick = {
+                    val month = runCatching { YearMonth.parse(mes) }.getOrNull() ?: return@Button
+                    if (categoria == null) return@Button
+                    viewModel.crearPresupuesto(categoria, month, limite, Moneda.valueOf(monedaName)) { if (it) onDismiss() }
+                }, modifier = Modifier.fillMaxWidth()) { Text("Crear presupuesto") }
+            }
+        }
+    }
+}
+
+@Composable
 private fun <T> DropdownField(title: String, values: List<T>, selectedKey: String, key: (T) -> String, label: (T) -> String, allowEmpty: Boolean = false, onSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val selected = values.firstOrNull { key(it) == selectedKey }
@@ -558,8 +598,8 @@ private fun <T> DropdownField(title: String, values: List<T>, selectedKey: Strin
 
 @Composable
 private fun FilterChipButton(text: String, selected: Boolean, onClick: () -> Unit) {
-    if (selected) Button(onClick = onClick, modifier = Modifier.weight(1f)) { Text(text) }
-    else OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f)) { Text(text) }
+    if (selected) Button(onClick = onClick, modifier = Modifier.width(130.dp)) { Text(text) }
+    else OutlinedButton(onClick = onClick, modifier = Modifier.width(130.dp)) { Text(text) }
 }
 
 private fun formatMoney(value: Double, moneda: Moneda): String {
