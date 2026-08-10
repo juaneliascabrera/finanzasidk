@@ -52,7 +52,7 @@ Los tests actuales cubren presupuestos, identidad de entidades, cuentas, ingreso
 
 Los tests de persistencia se ejecutan en la JVM con SQLite bundled, sin Android ni dispositivo. Verifican tanto el mapeo de datos como la reconstrucción del dominio y el orden de registro de las operaciones.
 
-El módulo `app` tiene un smoke test Compose en `src/androidTest`. Para ejecutarlo se necesita Android SDK y un emulador o dispositivo:
+El módulo `app` tiene un smoke test Compose en `src/androidTest`. Para ejecutarlo se necesita Android SDK y un emulador o dispositivo. En el entorno de desarrollo actual no hay SDK Android, por lo que esta validación queda preparada pero no ejecutada aquí:
 
 ```bash
 ./gradlew :app:assembleDebug

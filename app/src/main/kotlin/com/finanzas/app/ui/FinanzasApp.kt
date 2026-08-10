@@ -350,6 +350,7 @@ private fun MovementRow(cuenta: Cuenta, transaccion: Transaccion) {
         is AjusteValuacion -> "Ajuste de valuación"
         is com.finanzas.core.dominio.TransferIngreso -> "Entrada por ${transaccion.transferencia.tipo.label()}"
         is com.finanzas.core.dominio.TransferEgreso -> "Salida por ${transaccion.transferencia.tipo.label()}"
+        else -> "Movimiento"
     }
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .35f))) {
         Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {

@@ -173,7 +173,7 @@ canónica del comando está en `docs/COMANDOS.md`.
 La arquitectura y el esquema de almacenamiento están documentados en
 `docs/PERSISTENCIA.md`.
 
-Para validar Android se necesita un entorno con Android SDK:
+Para validar Android se necesita un entorno con Android SDK. El smoke test está preparado, pero no se ejecutó en este entorno porque no tiene SDK Android:
 
 ```bash
 ./gradlew :app:assembleDebug

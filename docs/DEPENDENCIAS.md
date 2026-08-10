@@ -41,3 +41,15 @@ Este archivo registra las dependencias externas del proyecto y el motivo de cada
 
 - **Qué es:** biblioteca para ejecutar operaciones asíncronas y suspendibles.
 - **Por qué existe:** Room para JVM/KMP requiere métodos `suspend` en los DAOs; también permite que la futura app no bloquee el hilo principal al acceder a SQLite.
+
+### Android Gradle Plugin
+
+- **Qué es:** plugin de Gradle que compila y empaqueta la aplicación Android.
+- **Por qué existe:** el módulo `app` necesita generar el APK y resolver recursos Android.
+- **Dónde se usa:** únicamente en `app`; `core` y `persistence` siguen siendo módulos JVM.
+
+### Jetpack Compose y Material 3
+
+- **Qué son:** toolkit declarativo y sistema visual para construir la interfaz Android.
+- **Por qué existen:** permiten una UI adaptable, con componentes accesibles y estados explícitos sin introducir XML ni una jerarquía visual difícil de mantener.
+- **Dónde se usan:** módulo `app`.
