@@ -53,6 +53,12 @@ class Transferencia(
         cuentaDestino.registrar(transferIngreso)
     }
 
+    override fun equals(otra: Any?): Boolean {
+        return otra is Transferencia && id == otra.id
+    }
+
+    override fun hashCode(): Int = id.hashCode()
+
     override fun toString(): String {
         return "Transferencia(id=$id, fecha=$fecha, origen=${cuentaOrigen.id}, destino=${cuentaDestino.id}, monto=$monto)"
     }

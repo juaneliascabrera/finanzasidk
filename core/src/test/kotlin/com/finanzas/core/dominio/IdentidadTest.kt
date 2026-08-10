@@ -46,6 +46,26 @@ class IdentidadTest {
     }
 
     @Test
+    fun transferencias_con_el_mismo_id_representan_la_misma_transferencia() {
+        val primera = Transferencia(
+            id = "transferencia-1",
+            cuentaOrigen = cuenta("origen-1"),
+            cuentaDestino = cuenta("destino-1"),
+            fecha = LocalDate.of(2026, 8, 1),
+            monto = Dinero.ars("100.00")
+        )
+        val segunda = Transferencia(
+            id = "transferencia-1",
+            cuentaOrigen = cuenta("origen-2"),
+            cuentaDestino = cuenta("destino-2"),
+            fecha = LocalDate.of(2026, 8, 2),
+            monto = Dinero.ars("200.00")
+        )
+
+        assertEquals(primera, segunda)
+    }
+
+    @Test
     fun presupuestos_con_el_mismo_id_representan_el_mismo_presupuesto() {
         val primero = Presupuesto(
             id = "presupuesto-1",
@@ -75,5 +95,15 @@ class IdentidadTest {
         assertFailsWith<IllegalArgumentException> {
             Categoria(id = "comida", nombre = "   ")
         }
+    }
+
+    private fun cuenta(id: String): Cuenta {
+        return Cuenta(
+            id = id,
+            nombre = id,
+            moneda = Moneda.ARS,
+            tipo = TipoCuenta.OPERATIVA,
+            saldoInicial = Dinero.ars("100.00")
+        )
     }
 }
