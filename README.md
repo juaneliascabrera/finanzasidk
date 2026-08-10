@@ -173,6 +173,9 @@ canónica del comando está en `docs/COMANDOS.md`.
 La arquitectura y el esquema de almacenamiento están documentados en
 `docs/PERSISTENCIA.md`.
 
+La arquitectura visual y los flujos de la aplicación están documentados en
+`docs/APP.md`.
+
 Para validar Android se necesita un entorno con Android SDK. El smoke test está preparado, pero no se ejecutó en este entorno porque no tiene SDK Android:
 
 ```bash

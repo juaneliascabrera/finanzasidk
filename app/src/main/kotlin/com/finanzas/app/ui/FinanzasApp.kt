@@ -524,6 +524,14 @@ private fun TransferenciaDialog(state: FinanzasUiState, viewModel: FinanzasViewM
                     error = "No hay cuentas compatibles con este tipo de movimiento"
                     return@Button
                 }
+                if (origen.id == destino.id) {
+                    error = "Elegí dos cuentas diferentes"
+                    return@Button
+                }
+                if (origen.moneda != destino.moneda) {
+                    error = "Las cuentas deben usar la misma moneda"
+                    return@Button
+                }
                 val amount = runCatching { Dinero.de(importe.trim().replace(',', '.'), origen.moneda) }.getOrNull()
                 if (amount == null || amount.importe <= BigDecimal.ZERO) {
                     error = "Ingresá un importe positivo"
