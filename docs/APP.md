@@ -28,6 +28,8 @@ Desde la interfaz se pueden crear:
 - transferencias normales;
 - aportes y rescates;
 - ajustes de valuación.
+- edición de nombres de cuentas y categorías;
+- edición de límites de presupuestos.
 
 Los formularios validan localmente fechas, importes, cuentas compatibles y
 monedas antes de invocar el ViewModel. El dominio vuelve a validar la operación
@@ -68,6 +70,5 @@ no ejecutado aquí.
 - Extraer textos a recursos localizables cuando se definan idiomas adicionales.
 - Agregar selección de fecha con DatePicker si el ingreso manual de `AAAA-MM-DD`
   resulta demasiado lento.
-- Agregar edición y archivado desde la interfaz cuando esas operaciones tengan
-  un flujo de negocio definido.
+- Agregar archivado desde la interfaz cuando el dominio modele ese estado.
 - Agregar estados de carga por acción si la persistencia deja de ser local.

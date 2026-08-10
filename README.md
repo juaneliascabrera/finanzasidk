@@ -37,6 +37,7 @@ El módulo `app` incluye una interfaz Compose inicial con:
 - transferencias, aportes y rescates;
 - ajustes de valuación;
 - creación de cuentas y categorías.
+- edición de nombres de cuentas y categorías y límites de presupuestos.
 
 Todavía no están implementados:
 
