@@ -233,7 +233,7 @@ private fun InicioScreen(
     val cuentasArs = state.cuentas.filter { it.moneda == Moneda.ARS }
     val cuentasUsd = state.cuentas.filter { it.moneda == Moneda.USD }
     val egresos = state.cuentas.flatMap { it.transacciones() }.filterIsInstance<Egreso>()
-    val presupuesto = state.presupuestos.firstOrNull()
+    val presupuesto = state.presupuestos.firstOrNull { it.mes == YearMonth.now() }
     val restante = presupuesto?.restante(egresos)
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
@@ -457,6 +457,7 @@ private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewMode
     var categoryId by rememberSaveable { mutableStateOf(state.categorias.firstOrNull()?.id.orEmpty()) }
     var importe by rememberSaveable { mutableStateOf("") }
     var fecha by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
     val cuenta = state.cuentas.firstOrNull { it.id == accountId }
     FormDialog(if (ingreso) "Nuevo ingreso" else "Nuevo gasto", onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -468,10 +469,24 @@ private fun MovimientoDialog(state: FinanzasUiState, viewModel: FinanzasViewMode
             if (!ingreso) DropdownField("Categoría", state.categorias, categoryId, { it.id }, { it.nombre }, allowEmpty = true) { categoryId = it }
             OutlinedTextField(importe, { importe = it }, label = { Text("Importe") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             Button(
                 onClick = {
-                    if (cuenta == null) return@Button
-                    val date = runCatching { LocalDate.parse(fecha) }.getOrNull() ?: return@Button
+                    if (cuenta == null) {
+                        error = "Elegí una cuenta"
+                        return@Button
+                    }
+                    val amount = runCatching { Dinero.de(importe.trim().replace(',', '.'), cuenta.moneda) }.getOrNull()
+                    if (amount == null || amount.importe <= BigDecimal.ZERO) {
+                        error = "Ingresá un importe positivo"
+                        return@Button
+                    }
+                    val date = runCatching { LocalDate.parse(fecha) }.getOrNull()
+                    if (date == null) {
+                        error = "La fecha debe tener formato AAAA-MM-DD"
+                        return@Button
+                    }
+                    error = null
                     val done: (Boolean) -> Unit = { if (it) onDismiss() }
                     if (ingreso) viewModel.registrarIngreso(cuenta, importe, date, done)
                     else viewModel.registrarEgreso(cuenta, state.categorias.firstOrNull { it.id == categoryId }, importe, date, done)
@@ -489,6 +504,7 @@ private fun TransferenciaDialog(state: FinanzasUiState, viewModel: FinanzasViewM
     var destinoId by rememberSaveable { mutableStateOf(state.cuentas.getOrNull(1)?.id.orEmpty()) }
     var importe by rememberSaveable { mutableStateOf("") }
     var fecha by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
     val tipo = transferTypes.firstOrNull { it.key() == tipoKey } ?: TipoTransferencia.NORMAL
     val origenes = state.cuentas.filter { it.tipo == tipo.originType() }
     val destinos = state.cuentas.filter { it.tipo == tipo.destinationType() }
@@ -501,9 +517,23 @@ private fun TransferenciaDialog(state: FinanzasUiState, viewModel: FinanzasViewM
             DropdownField("Destino", destinos, destino?.id.orEmpty(), { it.id }, { it.nombre }) { destinoId = it }
             OutlinedTextField(importe, { importe = it }, label = { Text("Importe") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             Button(onClick = {
-                if (origen == null || destino == null) return@Button
-                val date = runCatching { LocalDate.parse(fecha) }.getOrNull() ?: return@Button
+                if (origen == null || destino == null) {
+                    error = "No hay cuentas compatibles con este tipo de movimiento"
+                    return@Button
+                }
+                val amount = runCatching { Dinero.de(importe.trim().replace(',', '.'), origen.moneda) }.getOrNull()
+                if (amount == null || amount.importe <= BigDecimal.ZERO) {
+                    error = "Ingresá un importe positivo"
+                    return@Button
+                }
+                val date = runCatching { LocalDate.parse(fecha) }.getOrNull()
+                if (date == null) {
+                    error = "La fecha debe tener formato AAAA-MM-DD"
+                    return@Button
+                }
+                error = null
                 viewModel.registrarTransferencia(tipo, origen, destino, importe, date) { if (it) onDismiss() }
             }, modifier = Modifier.fillMaxWidth()) { Text("Guardar") }
         }
@@ -515,6 +545,7 @@ private fun AjusteDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, o
     var accountId by rememberSaveable { mutableStateOf(state.cuentas.firstOrNull { it.tipo == TipoCuenta.INVERSION }?.id.orEmpty()) }
     var nuevoValor by rememberSaveable { mutableStateOf("") }
     var fecha by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
     val cuentas = state.cuentas.filter { it.tipo == TipoCuenta.INVERSION }
     val cuenta = cuentas.firstOrNull { it.id == accountId } ?: cuentas.firstOrNull()
     FormDialog("Actualizar valuación", onDismiss) {
@@ -522,9 +553,23 @@ private fun AjusteDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, o
             DropdownField("Cuenta", cuentas, cuenta?.id.orEmpty(), { it.id }, { it.nombre }) { accountId = it }
             OutlinedTextField(nuevoValor, { nuevoValor = it }, label = { Text("Nuevo valor") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(fecha, { fecha = it }, label = { Text("Fecha (AAAA-MM-DD)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             Button(onClick = {
-                if (cuenta == null) return@Button
-                val date = runCatching { LocalDate.parse(fecha) }.getOrNull() ?: return@Button
+                if (cuenta == null) {
+                    error = "No hay cuentas de inversión"
+                    return@Button
+                }
+                val amount = runCatching { Dinero.de(nuevoValor.trim().replace(',', '.'), cuenta.moneda) }.getOrNull()
+                if (amount == null || amount.importe < BigDecimal.ZERO) {
+                    error = "Ingresá un valor válido"
+                    return@Button
+                }
+                val date = runCatching { LocalDate.parse(fecha) }.getOrNull()
+                if (date == null) {
+                    error = "La fecha debe tener formato AAAA-MM-DD"
+                    return@Button
+                }
+                error = null
                 viewModel.registrarAjuste(cuenta, nuevoValor, date) { if (it) onDismiss() }
             }, modifier = Modifier.fillMaxWidth()) { Text("Guardar") }
         }
