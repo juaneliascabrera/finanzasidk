@@ -88,6 +88,26 @@ class TransferenciaTest {
     }
 
     @Test
+    fun un_rescate_no_puede_dejar_negativa_la_cuenta_de_inversion() {
+        val origen = cuentaInversion()
+        val destino = cuentaEfectivo()
+
+        assertFailsWith<IllegalArgumentException> {
+            Transferencia(
+                id = "rescate-1",
+                cuentaOrigen = origen,
+                cuentaDestino = destino,
+                fecha = LocalDate.of(2026, 8, 10),
+                monto = Dinero.ars("150.01"),
+                tipo = TipoTransferencia.RESCATE_INVERSION
+            )
+        }
+
+        assertEquals(Dinero.ars("150.00"), origen.saldo())
+        assertEquals(Dinero.ars("50.00"), destino.saldo())
+    }
+
+    @Test
     fun un_aporte_requiere_una_cuenta_de_inversion_como_destino() {
         assertFailsWith<IllegalArgumentException> {
             Transferencia(

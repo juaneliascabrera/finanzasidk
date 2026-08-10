@@ -241,4 +241,16 @@ obtiene el anterior desde el saldo actual y registra el ajuste histórico.
 
 ---
 
+## 9. Saldo negativo por rescates
+
+Una cuenta de inversión no puede quedar con saldo negativo como consecuencia de
+un rescate.
+
+### Estado: RESUELTO
+
+`RESCATE_INVERSION` valida que el saldo actual de la cuenta de inversión sea
+mayor o igual al monto solicitado antes de registrar la pata de salida.
+
+---
+
 Última actualización: agosto 2026.

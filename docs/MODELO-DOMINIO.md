@@ -97,6 +97,8 @@ Una cuenta de inversión **no permite egresos**. Un gasto nunca puede salir dire
 
 Un rescate de inversión sí está permitido: es una transferencia desde la cuenta de inversión hacia una cuenta operativa de la misma moneda. Luego, el gasto se registra desde la cuenta operativa.
 
+El monto rescatado no puede superar el saldo actual de la cuenta de inversión.
+
 ## Operaciones
 
 Todas las operaciones tienen, como mínimo:

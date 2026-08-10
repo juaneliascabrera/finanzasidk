@@ -175,8 +175,7 @@ La arquitectura y el esquema de almacenamiento están documentados en
 ## Próximos pasos
 
 1. Agregar migraciones y operaciones de actualización/eliminación persistente.
-2. Revisar el límite de rescates respecto del saldo disponible.
-3. Crear el módulo Android `app`.
-4. Construir la pantalla principal de registro rápido de egresos.
+2. Crear el módulo Android `app`.
+3. Construir la pantalla principal de registro rápido de egresos.
 
 La documentación funcional completa está en `docs/MODELO-DOMINIO.md`.

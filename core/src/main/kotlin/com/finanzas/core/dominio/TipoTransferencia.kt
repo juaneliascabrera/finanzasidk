@@ -25,9 +25,18 @@ sealed class TipoTransferencia(
         }
     }
 
+    open fun validarSaldoOrigen(cuenta: Cuenta, monto: Dinero) {
+    }
+
     object NORMAL : TipoTransferencia(TipoCuenta.OPERATIVA, TipoCuenta.OPERATIVA)
 
     object APORTE_INVERSION : TipoTransferencia(TipoCuenta.OPERATIVA, TipoCuenta.INVERSION)
 
-    object RESCATE_INVERSION : TipoTransferencia(TipoCuenta.INVERSION, TipoCuenta.OPERATIVA)
+    object RESCATE_INVERSION : TipoTransferencia(TipoCuenta.INVERSION, TipoCuenta.OPERATIVA) {
+        override fun validarSaldoOrigen(cuenta: Cuenta, monto: Dinero) {
+            require(cuenta.saldo().importe >= monto.importe) {
+                "El rescate no puede superar el saldo de la cuenta de inversion"
+            }
+        }
+    }
 }

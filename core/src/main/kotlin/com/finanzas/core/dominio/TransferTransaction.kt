@@ -52,6 +52,7 @@ class TransferEgreso(
     override fun validarRegistroEn(cuenta: Cuenta) {
         super.validarRegistroEn(cuenta)
         transferencia.tipo.validarOrigen(cuenta)
+        transferencia.tipo.validarSaldoOrigen(cuenta, monto)
         require(cuenta.id == transferencia.cuentaOrigen.id) {
             "La salida debe registrarse en la cuenta origen de la transferencia"
         }
