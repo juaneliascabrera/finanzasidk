@@ -14,6 +14,9 @@ driver SQLite bundled.
 - guardar ingresos, egresos y ajustes de valuación;
 - guardar transferencias normales, aportes y rescates;
 - validar las operaciones contra el estado persistido antes de insertarlas.
+- actualizar cuentas, categorías y presupuestos;
+- eliminar presupuestos;
+- eliminar cuentas y categorías solo cuando no tengan referencias.
 
 La capa de datos expone `FinanzasRepository`, cuyas operaciones son `suspend`
 porque Room para JVM/KMP exige acceso asíncrono a sus DAOs.
@@ -112,6 +115,6 @@ bash lastcommand.txt
 ## Alcance pendiente
 
 - No hay migraciones todavía: el esquema actual es versión 1.
-- No hay actualización ni eliminación de entidades persistidas.
+- No hay archivado: el dominio todavía no modela el estado archivado.
 - La unicidad de ids de transacciones sigue siendo local a cada cuenta.
 - La UI Android todavía no existe.

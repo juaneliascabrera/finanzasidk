@@ -174,7 +174,7 @@ La arquitectura y el esquema de almacenamiento están documentados en
 
 ## Próximos pasos
 
-1. Agregar migraciones y operaciones de actualización/eliminación persistente.
+1. Agregar migraciones para futuras versiones del esquema.
 2. Crear el módulo Android `app`.
 3. Construir la pantalla principal de registro rápido de egresos.
 

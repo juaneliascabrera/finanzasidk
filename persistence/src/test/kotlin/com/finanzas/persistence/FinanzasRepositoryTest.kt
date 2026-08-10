@@ -78,6 +78,99 @@ class FinanzasRepositoryTest {
     }
 
     @Test
+    fun actualiza_entidades_y_elimina_un_presupuesto() = runTest {
+        conRepositorio {
+            val categoria = Categoria("comida", "Comida")
+            guardarCuenta(cuentaBrubank())
+            guardarCategoria(categoria)
+            guardarPresupuesto(
+                Presupuesto(
+                    id = "presupuesto-1",
+                    categoria = categoria,
+                    mes = YearMonth.of(2026, 8),
+                    limite = Dinero.ars("300.00")
+                )
+            )
+
+            actualizarCuenta(
+                Cuenta(
+                    id = "brubank",
+                    nombre = "Brubank principal",
+                    moneda = Moneda.ARS,
+                    tipo = TipoCuenta.OPERATIVA,
+                    saldoInicial = Dinero.ars("100.00")
+                )
+            )
+            actualizarCategoria(Categoria("comida", "Alimentos"))
+            actualizarPresupuesto(
+                Presupuesto(
+                    id = "presupuesto-1",
+                    categoria = Categoria("comida", "Alimentos"),
+                    mes = YearMonth.of(2026, 8),
+                    limite = Dinero.ars("350.00")
+                )
+            )
+
+            assertEquals("Brubank principal", obtenerCuenta("brubank")!!.nombre)
+            assertEquals("Alimentos", obtenerCategorias().single().nombre)
+            assertEquals(Dinero.ars("350.00"), obtenerPresupuestos().single().limite)
+
+            eliminarPresupuesto("presupuesto-1")
+
+            assertEquals(emptyList(), obtenerPresupuestos())
+        }
+    }
+
+    @Test
+    fun permite_eliminar_cuentas_y_categorias_sin_referencias() = runTest {
+        conRepositorio {
+            guardarCuenta(cuentaBrubank())
+            guardarCategoria(Categoria("comida", "Comida"))
+
+            eliminarCuenta("brubank")
+            eliminarCategoria("comida")
+
+            assertEquals(emptyList(), obtenerCuentas())
+            assertEquals(emptyList(), obtenerCategorias())
+        }
+    }
+
+    @Test
+    fun no_elimina_una_cuenta_con_operaciones_ni_una_categoria_referenciada() = runTest {
+        conRepositorio {
+            val cuenta = cuentaBrubank()
+            val categoria = Categoria("comida", "Comida")
+            guardarCuenta(cuenta)
+            guardarCategoria(categoria)
+            guardarPresupuesto(
+                Presupuesto(
+                    id = "presupuesto-1",
+                    categoria = categoria,
+                    mes = YearMonth.of(2026, 8),
+                    limite = Dinero.ars("300.00")
+                )
+            )
+
+            assertFailsWith<IllegalArgumentException> {
+                eliminarCategoria(categoria.id)
+            }
+
+            registrarIngreso(
+                Ingreso(
+                    id = "ingreso-1",
+                    cuentaId = cuenta.id,
+                    fecha = LocalDate.of(2026, 8, 1),
+                    monto = Dinero.ars("10.00")
+                )
+            )
+
+            assertFailsWith<IllegalArgumentException> {
+                eliminarCuenta(cuenta.id)
+            }
+        }
+    }
+
+    @Test
     fun guarda_y_reconstruye_ingresos_egresos_y_su_saldo() = runTest {
         conRepositorio {
             val cuenta = cuentaBrubank()

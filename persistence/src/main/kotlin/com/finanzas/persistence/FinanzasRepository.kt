@@ -21,8 +21,41 @@ class FinanzasRepository(private val database: FinanzasDatabase) {
         dao.insertarCuenta(cuenta.aEntity())
     }
 
+    suspend fun actualizarCuenta(cuenta: Cuenta) {
+        require(dao.obtenerCuenta(cuenta.id) != null) {
+            "La cuenta no existe"
+        }
+        dao.actualizarCuenta(cuenta.aEntity())
+    }
+
+    suspend fun eliminarCuenta(id: String) {
+        val cuenta = dao.obtenerCuenta(id) ?: error("La cuenta no existe")
+        require(dao.contarOperacionesDeCuenta(id) == 0L) {
+            "No se puede eliminar una cuenta con operaciones"
+        }
+        dao.eliminarCuenta(cuenta)
+    }
+
     suspend fun guardarCategoria(categoria: Categoria) {
         dao.insertarCategoria(categoria.aEntity())
+    }
+
+    suspend fun actualizarCategoria(categoria: Categoria) {
+        require(dao.obtenerCategoria(categoria.id) != null) {
+            "La categoria no existe"
+        }
+        dao.actualizarCategoria(categoria.aEntity())
+    }
+
+    suspend fun eliminarCategoria(id: String) {
+        val categoria = dao.obtenerCategoria(id) ?: error("La categoria no existe")
+        require(dao.contarPresupuestosDeCategoria(id) == 0L) {
+            "No se puede eliminar una categoria con presupuestos"
+        }
+        require(dao.contarOperacionesDeCategoria(id) == 0L) {
+            "No se puede eliminar una categoria usada por operaciones"
+        }
+        dao.eliminarCategoria(categoria)
     }
 
     suspend fun guardarPresupuesto(presupuesto: Presupuesto) {
@@ -30,6 +63,21 @@ class FinanzasRepository(private val database: FinanzasDatabase) {
             "La categoria del presupuesto no existe"
         }
         dao.insertarPresupuesto(presupuesto.aEntity())
+    }
+
+    suspend fun actualizarPresupuesto(presupuesto: Presupuesto) {
+        require(dao.obtenerPresupuesto(presupuesto.id) != null) {
+            "El presupuesto no existe"
+        }
+        require(dao.obtenerCategoria(presupuesto.categoria.id) != null) {
+            "La categoria del presupuesto no existe"
+        }
+        dao.actualizarPresupuesto(presupuesto.aEntity())
+    }
+
+    suspend fun eliminarPresupuesto(id: String) {
+        val presupuesto = dao.obtenerPresupuesto(id) ?: error("El presupuesto no existe")
+        dao.eliminarPresupuesto(presupuesto)
     }
 
     suspend fun registrarIngreso(ingreso: Ingreso) {
