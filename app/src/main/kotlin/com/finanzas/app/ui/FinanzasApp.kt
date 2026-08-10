@@ -99,7 +99,9 @@ private enum class DialogKind {
     TRANSFERENCIA,
     AJUSTE,
     CUENTA,
-    CATEGORIA,
+    CATEGORIAS,
+    EDITAR_CUENTA,
+    EDITAR_PRESUPUESTO,
     PRESUPUESTO
 }
 
@@ -117,6 +119,8 @@ fun FinanzasApp() {
     var selectedTab by rememberSaveable { mutableStateOf(AppTab.INICIO.name) }
     var dialog by rememberSaveable { mutableStateOf(DialogKind.NONE.name) }
     var movimientoIngreso by rememberSaveable { mutableStateOf(false) }
+    var cuentaEnEdicionId by rememberSaveable { mutableStateOf("") }
+    var presupuestoEnEdicionId by rememberSaveable { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.error) {
@@ -167,7 +171,8 @@ fun FinanzasApp() {
                     onIngreso = { movimientoIngreso = true; dialog = DialogKind.MOVIMIENTO.name },
                     onTransferencia = { dialog = DialogKind.TRANSFERENCIA.name },
                     onCuenta = { dialog = DialogKind.CUENTA.name },
-                    onCategoria = { dialog = DialogKind.CATEGORIA.name }
+                    onCategoria = { dialog = DialogKind.CATEGORIAS.name },
+                    onEditarCuenta = { cuentaEnEdicionId = it.id; dialog = DialogKind.EDITAR_CUENTA.name }
                 )
                 tab == AppTab.MOVIMIENTOS -> MovimientosScreen(state)
                 tab == AppTab.INVERSIONES -> InversionesScreen(
@@ -175,7 +180,11 @@ fun FinanzasApp() {
                     onTransferencia = { dialog = DialogKind.TRANSFERENCIA.name },
                     onAjuste = { dialog = DialogKind.AJUSTE.name }
                 )
-                else -> PresupuestosScreen(state) { dialog = DialogKind.PRESUPUESTO.name }
+                else -> PresupuestosScreen(
+                    state = state,
+                    onNuevoPresupuesto = { dialog = DialogKind.PRESUPUESTO.name },
+                    onEditarPresupuesto = { presupuestoEnEdicionId = it.id; dialog = DialogKind.EDITAR_PRESUPUESTO.name }
+                )
             }
         }
     }
@@ -185,7 +194,13 @@ fun FinanzasApp() {
         DialogKind.TRANSFERENCIA -> TransferenciaDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.AJUSTE -> AjusteDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.CUENTA -> CuentaDialog(state, viewModel) { dialog = DialogKind.NONE }
-        DialogKind.CATEGORIA -> CategoriaDialog(state, viewModel) { dialog = DialogKind.NONE }
+        DialogKind.CATEGORIAS -> CategoriasDialog(state, viewModel) { dialog = DialogKind.NONE }
+        DialogKind.EDITAR_CUENTA -> state.cuentas.firstOrNull { it.id == cuentaEnEdicionId }?.let { cuenta ->
+            EditarCuentaDialog(cuenta, state, viewModel) { dialog = DialogKind.NONE }
+        }
+        DialogKind.EDITAR_PRESUPUESTO -> state.presupuestos.firstOrNull { it.id == presupuestoEnEdicionId }?.let { presupuesto ->
+            EditarPresupuestoDialog(presupuesto, state, viewModel) { dialog = DialogKind.NONE }
+        }
         DialogKind.PRESUPUESTO -> PresupuestoDialog(state, viewModel) { dialog = DialogKind.NONE }
         DialogKind.NONE -> Unit
     }
@@ -222,7 +237,8 @@ private fun InicioScreen(
     onIngreso: () -> Unit,
     onTransferencia: () -> Unit,
     onCuenta: () -> Unit,
-    onCategoria: () -> Unit
+    onCategoria: () -> Unit,
+    onEditarCuenta: (Cuenta) -> Unit
 ) {
     val cuentasArs = state.cuentas.filter { it.moneda == Moneda.ARS }
     val cuentasUsd = state.cuentas.filter { it.moneda == Moneda.USD }
@@ -252,7 +268,7 @@ private fun InicioScreen(
         item {
             SectionTitle("Tus cuentas")
         }
-        items(state.cuentas, key = { it.id }) { cuenta -> AccountCard(cuenta) }
+        items(state.cuentas, key = { it.id }) { cuenta -> AccountCard(cuenta, onEditar = { onEditarCuenta(cuenta) }) }
         if (presupuesto != null && restante != null) {
             item { BudgetCard(presupuesto, restante) }
         }
@@ -299,7 +315,7 @@ private fun QuickAction(icon: androidx.compose.ui.graphics.vector.ImageVector, l
 }
 
 @Composable
-private fun AccountCard(cuenta: Cuenta) {
+private fun AccountCard(cuenta: Cuenta, onEditar: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .45f))) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(if (cuenta.tipo == TipoCuenta.INVERSION) Icons.Outlined.Savings else Icons.Outlined.AccountBalance, null, tint = MaterialTheme.colorScheme.primary)
@@ -309,6 +325,9 @@ private fun AccountCard(cuenta: Cuenta) {
                 Text(if (cuenta.tipo == TipoCuenta.INVERSION) "Inversión" else "Operativa", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Text(formatMoney(cuenta.saldo()), fontWeight = FontWeight.Bold)
+            IconButton(onClick = onEditar) {
+                Icon(Icons.Outlined.MoreHoriz, contentDescription = "Editar ${cuenta.nombre}")
+            }
         }
     }
 }
@@ -385,7 +404,11 @@ private fun InversionesScreen(state: FinanzasUiState, onTransferencia: () -> Uni
 }
 
 @Composable
-private fun PresupuestosScreen(state: FinanzasUiState, onNuevoPresupuesto: () -> Unit) {
+private fun PresupuestosScreen(
+    state: FinanzasUiState,
+    onNuevoPresupuesto: () -> Unit,
+    onEditarPresupuesto: (Presupuesto) -> Unit
+) {
     val egresos = state.cuentas.flatMap { it.transacciones() }.filterIsInstance<Egreso>()
     LazyColumn(Modifier.fillMaxSize().padding(horizontal = 20.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 22.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -397,13 +420,15 @@ private fun PresupuestosScreen(state: FinanzasUiState, onNuevoPresupuesto: () ->
                 TextButton(onClick = onNuevoPresupuesto) { Text("Nuevo") }
             }
         }
-        items(state.presupuestos, key = { it.id }) { presupuesto -> BudgetCard(presupuesto, presupuesto.restante(egresos)) }
+        items(state.presupuestos, key = { it.id }) { presupuesto ->
+            BudgetCard(presupuesto, presupuesto.restante(egresos)) { onEditarPresupuesto(presupuesto) }
+        }
         if (state.presupuestos.isEmpty()) item { Text("Todavía no configuraste presupuestos.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
 }
 
 @Composable
-private fun BudgetCard(presupuesto: Presupuesto, restante: Dinero) {
+private fun BudgetCard(presupuesto: Presupuesto, restante: Dinero, onEditar: (() -> Unit)? = null) {
     val progress = if (presupuesto.limite.importe.signum() == 0) {
         0f
     } else {
@@ -420,6 +445,11 @@ private fun BudgetCard(presupuesto: Presupuesto, restante: Dinero) {
                     Text(presupuesto.mes.toString(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(formatMoney(restante), fontWeight = FontWeight.Bold)
+                onEditar?.let {
+                    IconButton(onClick = it) {
+                        Icon(Icons.Outlined.MoreHoriz, contentDescription = "Editar presupuesto")
+                    }
+                }
             }
             Spacer(Modifier.height(12.dp))
             androidx.compose.material3.LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
@@ -602,12 +632,65 @@ private fun CuentaDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, o
 }
 
 @Composable
-private fun CategoriaDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+private fun CategoriasDialog(state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+    var categoriaEnEdicion by rememberSaveable { mutableStateOf<String?>(null) }
     var nombre by rememberSaveable { mutableStateOf("") }
-    FormDialog("Nueva categoría", onDismiss) {
+    val categoria = state.categorias.firstOrNull { it.id == categoriaEnEdicion }
+    FormDialog(if (categoriaEnEdicion == null) "Categorías" else if (categoria == null) "Nueva categoría" else "Editar categoría", onDismiss) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (categoriaEnEdicion == null) {
+                if (state.categorias.isEmpty()) {
+                    Text("Todavía no hay categorías.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    state.categorias.forEach { item ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(item.nombre, Modifier.weight(1f))
+                            IconButton(onClick = { categoriaEnEdicion = item.id; nombre = item.nombre }) {
+                                Icon(Icons.Outlined.MoreHoriz, contentDescription = "Editar ${item.nombre}")
+                            }
+                        }
+                    }
+                }
+                Button(onClick = { categoriaEnEdicion = ""; nombre = "" }, modifier = Modifier.fillMaxWidth()) { Text("Nueva categoría") }
+            } else {
+                OutlinedTextField(nombre, { nombre = it }, label = { Text("Nombre") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { categoriaEnEdicion = null }, modifier = Modifier.weight(1f)) { Text("Volver") }
+                    Button(enabled = !state.guardando, onClick = {
+                        val existente = categoria
+                        if (existente == null) {
+                            viewModel.crearCategoria(nombre) { if (it) { categoriaEnEdicion = null; nombre = "" } }
+                        } else {
+                            viewModel.actualizarCategoria(existente, nombre) { if (it) { categoriaEnEdicion = null; nombre = "" } }
+                        }
+                    }, modifier = Modifier.weight(1f)) { Text("Guardar") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EditarCuentaDialog(cuenta: Cuenta, state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+    var nombre by rememberSaveable(cuenta.id) { mutableStateOf(cuenta.nombre) }
+    FormDialog("Editar cuenta", onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             OutlinedTextField(nombre, { nombre = it }, label = { Text("Nombre") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            Button(enabled = !state.guardando, onClick = { viewModel.crearCategoria(nombre) { if (it) onDismiss() } }, modifier = Modifier.fillMaxWidth()) { Text("Crear categoría") }
+            Text("${cuenta.tipo.label()} · ${cuenta.moneda.name}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("El tipo, moneda y saldo inicial no se pueden cambiar después de registrar operaciones.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Button(enabled = !state.guardando, onClick = { viewModel.actualizarCuenta(cuenta, nombre) { if (it) onDismiss() } }, modifier = Modifier.fillMaxWidth()) { Text("Guardar") }
+        }
+    }
+}
+
+@Composable
+private fun EditarPresupuestoDialog(presupuesto: Presupuesto, state: FinanzasUiState, viewModel: FinanzasViewModel, onDismiss: () -> Unit) {
+    var limite by rememberSaveable(presupuesto.id) { mutableStateOf(presupuesto.limite.importe.toPlainString()) }
+    FormDialog("Editar presupuesto", onDismiss) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("${presupuesto.categoria.nombre} · ${presupuesto.mes}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedTextField(limite, { limite = it }, label = { Text("Límite") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
+            Button(enabled = !state.guardando, onClick = { viewModel.actualizarPresupuesto(presupuesto, limite) { if (it) onDismiss() } }, modifier = Modifier.fillMaxWidth()) { Text("Guardar") }
         }
     }
 }
@@ -684,6 +767,11 @@ private fun TipoTransferencia.label(): String = when (this) {
     TipoTransferencia.NORMAL -> "Transferencia"
     TipoTransferencia.APORTE_INVERSION -> "Aporte"
     TipoTransferencia.RESCATE_INVERSION -> "Rescate"
+}
+
+private fun TipoCuenta.label(): String = when (this) {
+    TipoCuenta.OPERATIVA -> "Operativa"
+    TipoCuenta.INVERSION -> "Inversión"
 }
 
 private fun TipoTransferencia.key(): String = when (this) {

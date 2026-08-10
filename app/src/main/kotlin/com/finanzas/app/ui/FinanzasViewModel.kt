@@ -82,6 +82,26 @@ class FinanzasViewModel(
         }
     }
 
+    fun actualizarCuenta(cuenta: Cuenta, nombre: String, terminado: (Boolean) -> Unit) {
+        ejecutar(terminado) {
+            repository.actualizarCuenta(
+                Cuenta(
+                    id = cuenta.id,
+                    nombre = nombre.trim(),
+                    moneda = cuenta.moneda,
+                    tipo = cuenta.tipo,
+                    saldoInicial = cuenta.saldoInicial
+                )
+            )
+        }
+    }
+
+    fun actualizarCategoria(categoria: Categoria, nombre: String, terminado: (Boolean) -> Unit) {
+        ejecutar(terminado) {
+            repository.actualizarCategoria(Categoria(categoria.id, nombre.trim()))
+        }
+    }
+
     fun crearPresupuesto(
         categoria: Categoria,
         mes: java.time.YearMonth,
@@ -96,6 +116,19 @@ class FinanzasViewModel(
                     categoria = categoria,
                     mes = mes,
                     limite = Dinero.de(limite.normalizarImporte(), moneda)
+                )
+            )
+        }
+    }
+
+    fun actualizarPresupuesto(presupuesto: Presupuesto, limite: String, terminado: (Boolean) -> Unit) {
+        ejecutar(terminado) {
+            repository.actualizarPresupuesto(
+                Presupuesto(
+                    id = presupuesto.id,
+                    categoria = presupuesto.categoria,
+                    mes = presupuesto.mes,
+                    limite = Dinero.de(limite.normalizarImporte(), presupuesto.limite.moneda)
                 )
             )
         }
