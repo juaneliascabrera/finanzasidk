@@ -61,7 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -190,18 +190,18 @@ fun FinanzasApp() {
     }
 
     when (DialogKind.valueOf(dialog)) {
-        DialogKind.MOVIMIENTO -> MovimientoDialog(state, viewModel, movimientoIngreso) { dialog = DialogKind.NONE }
-        DialogKind.TRANSFERENCIA -> TransferenciaDialog(state, viewModel) { dialog = DialogKind.NONE }
-        DialogKind.AJUSTE -> AjusteDialog(state, viewModel) { dialog = DialogKind.NONE }
-        DialogKind.CUENTA -> CuentaDialog(state, viewModel) { dialog = DialogKind.NONE }
-        DialogKind.CATEGORIAS -> CategoriasDialog(state, viewModel) { dialog = DialogKind.NONE }
+        DialogKind.MOVIMIENTO -> MovimientoDialog(state, viewModel, movimientoIngreso) { dialog = DialogKind.NONE.name }
+        DialogKind.TRANSFERENCIA -> TransferenciaDialog(state, viewModel) { dialog = DialogKind.NONE.name }
+        DialogKind.AJUSTE -> AjusteDialog(state, viewModel) { dialog = DialogKind.NONE.name }
+        DialogKind.CUENTA -> CuentaDialog(state, viewModel) { dialog = DialogKind.NONE.name }
+        DialogKind.CATEGORIAS -> CategoriasDialog(state, viewModel) { dialog = DialogKind.NONE.name }
         DialogKind.EDITAR_CUENTA -> state.cuentas.firstOrNull { it.id == cuentaEnEdicionId }?.let { cuenta ->
-            EditarCuentaDialog(cuenta, state, viewModel) { dialog = DialogKind.NONE }
+            EditarCuentaDialog(cuenta, state, viewModel) { dialog = DialogKind.NONE.name }
         }
         DialogKind.EDITAR_PRESUPUESTO -> state.presupuestos.firstOrNull { it.id == presupuestoEnEdicionId }?.let { presupuesto ->
-            EditarPresupuestoDialog(presupuesto, state, viewModel) { dialog = DialogKind.NONE }
+            EditarPresupuestoDialog(presupuesto, state, viewModel) { dialog = DialogKind.NONE.name }
         }
-        DialogKind.PRESUPUESTO -> PresupuestoDialog(state, viewModel) { dialog = DialogKind.NONE }
+        DialogKind.PRESUPUESTO -> PresupuestoDialog(state, viewModel) { dialog = DialogKind.NONE.name }
         DialogKind.NONE -> Unit
     }
 }
