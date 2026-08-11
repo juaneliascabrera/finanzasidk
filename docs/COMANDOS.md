@@ -54,6 +54,22 @@ Estos comandos requieren Android SDK configurado:
 
 El último requiere un emulador o dispositivo conectado.
 
+## Build portable con GitHub Actions
+
+El workflow `.github/workflows/android.yml` se ejecuta automáticamente en cada
+push a `main` y puede lanzarse manualmente desde GitHub con **Actions** →
+**Android** → **Run workflow**.
+
+El workflow:
+
+- configura Java, Gradle y Android SDK;
+- ejecuta los tests de `core` y `persistence`;
+- compila `app-debug.apk`;
+- publica el artifact `finanzas-debug-apk` durante 14 días.
+
+Desde el celular, se puede abrir la ejecución terminada en GitHub, descargar el
+artifact y extraer `app-debug.apk` para instalarlo.
+
 ## Comando local JVM
 
 Cuando exista un entorno con Java configurado, el equivalente será:

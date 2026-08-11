@@ -185,6 +185,11 @@ Para validar Android se necesita un entorno con Android SDK. El smoke test está
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
+También existe un workflow de GitHub Actions que configura el SDK, ejecuta los
+tests JVM y publica la APK debug como artifact. Puede lanzarse desde la pestaña
+**Actions** de GitHub con la opción **Run workflow**. El artifact se llama
+`finanzas-debug-apk`.
+
 ## Decisiones de diseño
 
 - `core` se mantiene independiente de Android y de la persistencia.
