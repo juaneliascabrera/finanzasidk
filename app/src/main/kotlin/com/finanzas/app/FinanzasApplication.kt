@@ -1,13 +1,14 @@
 package com.finanzas.app
 
 import android.app.Application
-import com.finanzas.persistence.FinanzasDatabaseFactory
+import androidx.room.Room
+import com.finanzas.persistence.FinanzasDatabase
 import com.finanzas.persistence.FinanzasRepository
 
 class FinanzasApplication : Application() {
     val repository: FinanzasRepository by lazy {
         FinanzasRepository(
-            FinanzasDatabaseFactory.enArchivo("$filesDir/finanzas.db")
+            Room.databaseBuilder(this, FinanzasDatabase::class.java, "finanzas.db").build()
         )
     }
 
